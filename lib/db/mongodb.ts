@@ -4,6 +4,8 @@ import dns from 'node:dns';
 const MONGODB_URI = process.env.MONGODB_URI!;
 const MONGODB_DNS_SERVERS = process.env.MONGODB_DNS_SERVERS;
 
+dns.setDefaultResultOrder('ipv4first');
+
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable');
 }

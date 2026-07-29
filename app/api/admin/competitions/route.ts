@@ -182,7 +182,8 @@ export async function GET() {
     await connectDB();
     const competitions = await CompetitionModel.find()
       .sort({ createdAt: -1 })
-      .select('name category status schedule analytics eligibility createdAt');
+      .select('name category status schedule analytics eligibility createdAt')
+      .lean();
     return NextResponse.json(competitions);
   } catch (error) {
     console.error('List competitions error:', error);

@@ -18,7 +18,8 @@ export default async function ResultsPage() {
   const results = await ResultModel.find()
     .populate<{ student: Pick<IUser, 'fullName' | 'playerId'> }>('student', 'fullName playerId')
     .sort({ completedAt: -1 })
-    .limit(50);
+    .limit(50)
+    .lean();
 
   return (
     <div className="space-y-6">

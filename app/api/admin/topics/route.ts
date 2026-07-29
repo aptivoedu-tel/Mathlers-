@@ -37,7 +37,8 @@ export async function GET(request: NextRequest) {
       .populate('grade', 'name')
       .populate('subject', 'name')
       .populate('subjects', 'name')
-      .sort({ order: 1, name: 1 });
+      .sort({ order: 1, name: 1 })
+      .lean();
 
     return NextResponse.json({
       success: true,

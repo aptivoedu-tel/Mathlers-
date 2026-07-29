@@ -22,9 +22,9 @@ export default async function AdminDashboard() {
 
   const [students, competitions, questions, results] = await Promise.all([
     UserModel.countDocuments({ isActive: true }),
-    CompetitionModel.countDocuments(),
-    QuestionModel.countDocuments(),
-    ResultModel.countDocuments()
+    CompetitionModel.estimatedDocumentCount(),
+    QuestionModel.estimatedDocumentCount(),
+    ResultModel.estimatedDocumentCount()
   ]);
 
   return (

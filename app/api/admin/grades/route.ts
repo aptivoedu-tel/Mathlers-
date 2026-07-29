@@ -11,7 +11,7 @@ export async function GET() {
     }
 
     await connectDB();
-    const grades = await GradeModel.find().sort({ order: 1, name: 1 });
+    const grades = await GradeModel.find().sort({ order: 1, name: 1 }).lean();
 
     return NextResponse.json({
       success: true,

@@ -7,7 +7,7 @@ export async function GET() {
   try {
     await connectDB();
 
-    const subjects = await SubjectModel.find({ isActive: true }).select('name code grades').populate('grades', 'name code');
+    const subjects = await SubjectModel.find({ isActive: true }).select('name code grades').populate('grades', 'name code').lean();
 
     return NextResponse.json({
       success: true,

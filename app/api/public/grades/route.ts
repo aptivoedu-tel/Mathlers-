@@ -6,7 +6,7 @@ export async function GET() {
   try {
     await connectDB();
 
-    const grades = await GradeModel.find({ isActive: true }).select('name level');
+    const grades = await GradeModel.find({ isActive: true }).select('name level').lean();
 
     return NextResponse.json({
       success: true,

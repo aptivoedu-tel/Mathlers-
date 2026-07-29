@@ -18,7 +18,7 @@ export async function GET() {
     if (!await requireSuperAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     await connectDB();
-    const subjects = await SubjectModel.find().populate('grades', 'name code').sort({ order: 1, name: 1 });
+    const subjects = await SubjectModel.find().populate('grades', 'name code').sort({ order: 1, name: 1 }).lean();
     return NextResponse.json({ success: true, data: subjects });
   } catch (error: unknown) {
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Unable to load subjects' }, { status: 500 });

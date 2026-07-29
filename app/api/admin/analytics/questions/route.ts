@@ -100,7 +100,8 @@ export async function GET(request: NextRequest) {
       .limit(10)
       .populate('subject', 'name')
       .populate('grade', 'name')
-      .select('question difficulty analytics.totalAttempts analytics.correctPercentage');
+      .select('question difficulty analytics.totalAttempts analytics.correctPercentage')
+      .lean();
 
     // Top 10 hardest questions (lowest correct percentage)
     const hardestQuestions = await QuestionModel.find({
@@ -111,7 +112,8 @@ export async function GET(request: NextRequest) {
       .limit(10)
       .populate('subject', 'name')
       .populate('grade', 'name')
-      .select('question difficulty analytics.totalAttempts analytics.correctPercentage');
+      .select('question difficulty analytics.totalAttempts analytics.correctPercentage')
+      .lean();
 
     // Top 10 easiest questions (highest correct percentage)
     const easiestQuestions = await QuestionModel.find({
@@ -122,7 +124,8 @@ export async function GET(request: NextRequest) {
       .limit(10)
       .populate('subject', 'name')
       .populate('grade', 'name')
-      .select('question difficulty analytics.totalAttempts analytics.correctPercentage');
+      .select('question difficulty analytics.totalAttempts analytics.correctPercentage')
+      .lean();
 
     // Questions by status
     const statsByStatus = await QuestionModel.aggregate([
