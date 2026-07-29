@@ -1,13 +1,18 @@
 'use client';
 
-import { useAuth as useClerkAuth, useUser } from '@clerk/nextjs';
-import { UserRole } from '@/lib/constants/roles';
+import { useSession } from 'next-auth/react';
+import { UserRole } from '@/models/User';
 
 export function useAuth() {
-  const { isLoaded, isSignedIn } = useClerkAuth();
-  const { user: clerkUser } = useUser();
-  const role = clerkUser?.publicMetadata.role as UserRole | undefined;
-  const user = clerkUser ? { id: clerkUser.id, email: clerkUser.primaryEmailAddress?.emailAddress, name: clerkUser.fullName, role } : undefined;
+  const { data: session, status, update } = useSession();
+  const user = session?.user ? {
+    id: (session.user as any).id,
+    email: session.user.email,
+    name: session.user.name,
+    role: (session.user as any).role as UserRole,
+  } : undefined;
+
+  const role = user?.role;
 
   const hasRole = (requiredRole: UserRole): boolean => {
     if (!role) return false;
@@ -27,13 +32,13 @@ export function useAuth() {
 
   return {
     user,
-    session: null,
-    isAuthenticated: isSignedIn,
-    isLoading: !isLoaded,
+    session,
+    isAuthenticated: !!session,
+    isLoading: status === 'loading',
     hasRole,
     isStudent,
     isAdmin,
     isSuperAdmin,
-    update: async () => undefined,
+    update,
   };
 }

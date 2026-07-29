@@ -9,7 +9,7 @@ export default function MainContent({ children }: { children: React.ReactNode })
     <main
       className={cn(
         "transition-all duration-300 min-h-screen p-6 pt-16 md:pt-8",
-        collapsed ? "md:pl-20" : "md:pl-68"
+        collapsed ? "md:pl-[5rem]" : "md:pl-[17rem]"
       )}
     >
       <div className="max-w-screen-xl mx-auto">
