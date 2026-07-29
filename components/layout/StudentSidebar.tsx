@@ -9,7 +9,7 @@ import {
   Award, FileText, Bell, Settings 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { UserButton } from '@clerk/nextjs';
+import SignOutButton from '@/components/ui/SignOutButton';
 
 const menuItems = [
   { icon: Home, label: 'Dashboard', href: '/student/dashboard' },
@@ -60,7 +60,7 @@ export default function StudentSidebar() {
           })}
         </nav>
         <div className="mt-4 flex items-center gap-3 border-t border-gray-100 pt-4">
-          <UserButton />
+          <SignOutButton />
           <span className="text-sm font-medium text-gray-600">Account</span>
         </div>
       </div>

@@ -9,7 +9,7 @@ import {
   BarChart3, Bell, Settings, Layers3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { UserButton } from '@clerk/nextjs';
+import SignOutButton from '@/components/ui/SignOutButton';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
@@ -65,7 +65,7 @@ export default function AdminSidebar({ isSuperAdmin = false }: { isSuperAdmin?: 
           })}
         </nav>
         <div className="mt-4 flex items-center gap-3 border-t border-slate-800 pt-4">
-          <UserButton />
+          <SignOutButton />
           <span className="text-sm font-medium text-slate-300">Account</span>
         </div>
       </div>

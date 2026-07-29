@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+import NextAuth from "next-auth";
+import { authOptions } from "@/lib/auth/auth";
 
-const retired = () => NextResponse.json({ error: 'This authentication endpoint has been retired. Use Clerk sign-in.' }, { status: 410 });
+const handler = NextAuth(authOptions);
 
-export const GET = retired;
-export const POST = retired;
+export { handler as GET, handler as POST };

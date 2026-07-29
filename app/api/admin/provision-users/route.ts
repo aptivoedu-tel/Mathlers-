@@ -1,6 +1,6 @@
 import { randomBytes } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { clerkClient } from '@clerk/nextjs/server';
+import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { auth, isAdmin } from '@/lib/auth/auth';
 import connectDB from '@/lib/db/mongodb';
@@ -48,19 +48,14 @@ export async function POST(request: NextRequest) {
     const existing = await UserModel.countDocuments({ email: { $in: input.accounts.map((account) => account.email) } });
     if (existing) return NextResponse.json({ error: 'One or more email addresses already belong to a Mathlers account.' }, { status: 409 });
 
-    const clerk = await clerkClient();
     const created: Array<{ fullName: string; email: string; password: string; role: UserRole }> = [];
     for (const account of input.accounts) {
       const password = temporaryPassword();
-      const [firstName, ...lastName] = account.fullName.split(/\s+/);
-      let clerkUser: Awaited<ReturnType<typeof clerk.users.createUser>> | undefined;
+      const hashedPassword = await bcrypt.hash(password, 10);
       try {
-        clerkUser = await clerk.users.createUser({
-          emailAddress: [account.email], password, firstName, lastName: lastName.join(' ') || undefined,
-          publicMetadata: { role: input.role },
-        });
         const user = await UserModel.create({
-          clerkId: clerkUser.id, fullName: account.fullName, email: account.email, playerId: playerId(), role: input.role,
+          fullName: account.fullName, email: account.email, playerId: playerId(), role: input.role,
+          password: hashedPassword,
           school: school._id, schoolName: school.name, grade: input.role === UserRole.STUDENT ? account.grade : undefined,
           isEmailVerified: false, profileComplete: input.role !== UserRole.STUDENT,
         });
@@ -69,7 +64,6 @@ export async function POST(request: NextRequest) {
         }
         created.push({ fullName: account.fullName, email: account.email, password, role: input.role });
       } catch {
-        if (clerkUser) await clerk.users.deleteUser(clerkUser.id).catch(() => undefined);
         return NextResponse.json({ error: `Could not provision ${account.email}. ${created.length} account(s) were created; remove or retry the failed row.`, created }, { status: 409 });
       }
     }

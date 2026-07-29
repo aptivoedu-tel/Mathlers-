@@ -3,15 +3,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
-import { UserButton, useAuth } from '@clerk/nextjs';
-
+import { useSession } from 'next-auth/react';
+import SignOutButton from '@/components/ui/SignOutButton';
 interface PublicLayoutProps {
   children: React.ReactNode;
 }
 
 const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { isLoaded, isSignedIn } = useAuth();
+  const { data: session, status } = useSession();
   const year = new Date().getFullYear();
 
   return (
@@ -36,10 +36,14 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
               <Link href="/#contact" className="text-gray-700 hover:text-brand-primary transition-colors">
                 Contact
               </Link>
-              {isLoaded && isSignedIn ? <UserButton /> : <>
-                <Link href="/sign-in" className="rounded-xl border border-transparent px-3 py-2 text-gray-700 transition-colors hover:border-gray-300 hover:text-brand-primary">Sign in</Link>
-                <Link href="/request-access" className="rounded-xl border border-transparent bg-brand-primary px-4 py-2 font-semibold text-white transition-colors hover:border-brand-dark hover:bg-brand-dark">Request access</Link>
-              </>}
+              {status === 'loading' ? null : session ? (
+                <div className="w-32"><SignOutButton /></div>
+              ) : (
+                <>
+                  <Link href="/sign-in" className="rounded-xl border border-transparent px-3 py-2 text-gray-700 transition-colors hover:border-gray-300 hover:text-brand-primary">Sign in</Link>
+                  <Link href="/request-access" className="rounded-xl border border-transparent bg-brand-primary px-4 py-2 font-semibold text-white transition-colors hover:border-brand-dark hover:bg-brand-dark">Request access</Link>
+                </>
+              )}
             </div>
 
             <button
@@ -61,10 +65,14 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
               <Link href="/#contact" className="block text-gray-700 hover:text-brand-primary transition-colors">
                 Contact
               </Link>
-              {isLoaded && isSignedIn ? <UserButton /> : <>
-                <Link href="/sign-in" className="block text-gray-700 hover:text-brand-primary">Sign in</Link>
-                <Link href="/request-access" className="mt-3 inline-block rounded-xl border border-transparent bg-brand-primary px-4 py-2 font-semibold text-white transition-colors hover:border-brand-dark hover:bg-brand-dark">Request access</Link>
-              </>}
+              {status === 'loading' ? null : session ? (
+                <div className="w-32"><SignOutButton /></div>
+              ) : (
+                <>
+                  <Link href="/sign-in" className="block text-gray-700 hover:text-brand-primary">Sign in</Link>
+                  <Link href="/request-access" className="mt-3 inline-block rounded-xl border border-transparent bg-brand-primary px-4 py-2 font-semibold text-white transition-colors hover:border-brand-dark hover:bg-brand-dark">Request access</Link>
+                </>
+              )}
             </div>
           )}
         </nav>

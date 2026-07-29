@@ -1,4 +1,4 @@
-import {ClerkProvider} from "@clerk/nextjs";
+import NextAuthProvider from '@/components/auth/NextAuthProvider';
 import type { Metadata } from "next";
 import "./globals.css";
 import ThemeProvider from '@/components/theme/ThemeProvider';
@@ -19,9 +19,9 @@ export default async function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
-        <ClerkProvider>
+        <NextAuthProvider>
           <ThemeProvider initialTheme={theme}>{children}</ThemeProvider>
-        </ClerkProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );

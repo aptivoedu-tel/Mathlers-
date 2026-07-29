@@ -1,4 +1,4 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { takeRateLimit } from '@/lib/security/rate-limit';
 
@@ -18,9 +18,12 @@ function clientAddress(request: Request) {
     || 'unknown';
 }
 
-/** Reject cross-site browser writes before they reach an authenticated API route. */
-export default clerkMiddleware((_auth, request) => {
-  if (!request.nextUrl.pathname.startsWith('/api/') || !mutatingMethods.has(request.method)) return;
+export default async function middleware(request: NextRequest) {
+  if (!request.nextUrl.pathname.startsWith('/api/') || !mutatingMethods.has(request.method)) {
+    const res = NextResponse.next();
+    res.headers.set('Content-Security-Policy', "base-uri 'self'; object-src 'none'; frame-ancestors 'none';");
+    return res;
+  }
 
   const origin = request.headers.get('origin');
   if (origin && origin !== request.nextUrl.origin) {
@@ -37,21 +40,15 @@ export default clerkMiddleware((_auth, request) => {
       );
     }
   }
-}, {
-  contentSecurityPolicy: {
-    strict: true,
-    directives: {
-      'base-uri': ["'self'"],
-      'object-src': ["'none'"],
-      'frame-ancestors': ["'none'"],
-    },
-  },
-});
+
+  const res = NextResponse.next();
+  res.headers.set('Content-Security-Policy', "base-uri 'self'; object-src 'none'; frame-ancestors 'none';");
+  return res;
+}
 
 export const config = {
   matcher: [
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
     '/(api|trpc)(.*)',
-    '/__clerk/:path*',
   ],
 };
