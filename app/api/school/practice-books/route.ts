@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth, isSchoolAdmin } from '@/lib/auth/auth';
+import { auth, isAdmin } from '@/lib/auth/auth';
 import connectDB from '@/lib/db/mongodb';
 import UserModel from '@/models/User';
 import SchoolModel from '@/models/School';
@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 export async function POST(request: Request) {
   try {
     const session = await auth();
-    if (!session || !isSchoolAdmin(session.user.role)) {
+    if (!session || !isAdmin(session.user.role)) {
       return NextResponse.json({ error: 'Unauthorized access.' }, { status: 403 });
     }
 
