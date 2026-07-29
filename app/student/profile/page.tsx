@@ -4,7 +4,7 @@ import connectDB from '@/lib/db/mongodb';
 import UserModel from '@/models/User';
 import ResultModel, { IResult } from '@/models/Result';
 import GlassCard from '@/components/ui/GlassCard';
-import PrimaryButton from '@/components/ui/PrimaryButton';
+import PageHeader from '@/components/ui/PageHeader';
 import { User, Mail, Edit, Award, TrendingUp, Target } from 'lucide-react';
 
 type ProfileResult = Pick<IResult, 'score' | 'accuracy' | 'type' | 'completedAt'> & {
@@ -29,109 +29,115 @@ export default async function StudentProfilePage() {
     : 0;
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">My Profile</h1>
+    <div className="max-w-6xl mx-auto space-y-6 animate-fade-in pb-12">
+      <PageHeader
+        title="My Profile"
+        subtitle="View your personal information, statistics, and recent activity."
+        breadcrumbs={[
+          { label: 'Student', href: '/student/dashboard' },
+          { label: 'Profile' }
+        ]}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Profile Card */}
-        <GlassCard className="p-6">
-          <div className="text-center mb-6">
-            <div className="w-32 h-32 bg-gradient-to-br from-brand-primary to-brand-dark rounded-full mx-auto mb-4 flex items-center justify-center text-white text-4xl font-bold">
+        <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card">
+          <div className="text-center mb-5">
+            <div className="w-24 h-24 bg-brand-lighter/60 text-brand-primary rounded-2xl mx-auto mb-3 flex items-center justify-center text-3xl font-bold">
               {user?.fullName?.charAt(0) || 'U'}
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">{user?.fullName}</h2>
-            <p className="text-gray-600">{user?.email}</p>
-            <p className="text-sm text-gray-500 mt-1">Player ID: {user?.playerId}</p>
+            <h2 className="text-base font-bold text-gray-900">{user?.fullName}</h2>
+            <p className="text-xs text-gray-500 mt-0.5">{user?.email}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5 font-mono">ID: {user?.playerId}</p>
           </div>
 
-          <PrimaryButton className="w-full mb-4">
-            <Edit className="w-4 h-4 mr-2" />
-            Edit Profile
-          </PrimaryButton>
+          <button className="w-full mb-4 inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 shadow-xs">
+            <Edit className="w-3.5 h-3.5" /> Edit Profile
+          </button>
 
-          <div className="space-y-3 pt-4 border-t">
-            <div className="flex items-center gap-3 text-sm">
-              <User className="w-5 h-5 text-gray-500" />
+          <div className="space-y-2.5 pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-2.5 text-xs">
+              <User className="w-4 h-4 text-gray-400" />
               <span className="text-gray-600">Student</span>
             </div>
-            <div className="flex items-center gap-3 text-sm">
-              <Mail className="w-5 h-5 text-gray-500" />
-              <span className="text-gray-600">{user?.email}</span>
+            <div className="flex items-center gap-2.5 text-xs">
+              <Mail className="w-4 h-4 text-gray-400" />
+              <span className="text-gray-600 truncate">{user?.email}</span>
             </div>
           </div>
         </GlassCard>
 
-        {/* Information Cards */}
-        <div className="lg:col-span-2 space-y-6">
+        {/* Right Column */}
+        <div className="lg:col-span-2 space-y-5">
           {/* Statistics */}
-          <GlassCard className="p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Statistics</h3>
+          <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card space-y-4">
+            <h3 className="text-base font-bold text-gray-900 tracking-tight">Statistics</h3>
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-brand-lighter rounded-xl p-4 text-center">
-                <Award className="w-8 h-8 mx-auto mb-2 text-brand-primary" />
-                <p className="text-2xl font-bold text-gray-900">{totalPoints.toLocaleString()}</p>
-                <p className="text-sm text-gray-600">Total Points</p>
+              <div className="bg-gray-50/80 border border-gray-100 rounded-xl p-4 text-center">
+                <Award className="w-6 h-6 mx-auto mb-2 text-brand-primary" />
+                <p className="text-lg font-bold text-gray-900">{totalPoints.toLocaleString()}</p>
+                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Total Points</p>
               </div>
-              <div className="bg-brand-lighter rounded-xl p-4 text-center">
-                <Target className="w-8 h-8 mx-auto mb-2 text-brand-primary" />
-                <p className="text-2xl font-bold text-gray-900">{results.length}</p>
-                <p className="text-sm text-gray-600">Tests Taken</p>
+              <div className="bg-gray-50/80 border border-gray-100 rounded-xl p-4 text-center">
+                <Target className="w-6 h-6 mx-auto mb-2 text-brand-primary" />
+                <p className="text-lg font-bold text-gray-900">{results.length}</p>
+                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Tests Taken</p>
               </div>
-              <div className="bg-brand-lighter rounded-xl p-4 text-center">
-                <TrendingUp className="w-8 h-8 mx-auto mb-2 text-brand-primary" />
-                <p className="text-2xl font-bold text-gray-900">{accuracy}%</p>
-                <p className="text-sm text-gray-600">Accuracy</p>
+              <div className="bg-gray-50/80 border border-gray-100 rounded-xl p-4 text-center">
+                <TrendingUp className="w-6 h-6 mx-auto mb-2 text-brand-primary" />
+                <p className="text-lg font-bold text-gray-900">{accuracy}%</p>
+                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Accuracy</p>
               </div>
             </div>
           </GlassCard>
 
           {/* Personal Information */}
-          <GlassCard className="p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h3>
+          <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card space-y-4">
+            <h3 className="text-base font-bold text-gray-900 tracking-tight">Personal Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
-                <p className="text-gray-900 font-semibold">{user?.fullName}</p>
+              <div className="p-3 bg-gray-50/80 rounded-xl border border-gray-100">
+                <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Full Name</label>
+                <p className="text-xs text-gray-900 font-bold">{user?.fullName}</p>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
-                <p className="text-gray-900 font-semibold">{user?.email}</p>
+              <div className="p-3 bg-gray-50/80 rounded-xl border border-gray-100">
+                <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Email</label>
+                <p className="text-xs text-gray-900 font-bold">{user?.email}</p>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Player ID</label>
-                <p className="text-gray-900 font-semibold">{user?.playerId}</p>
+              <div className="p-3 bg-gray-50/80 rounded-xl border border-gray-100">
+                <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Player ID</label>
+                <p className="text-xs text-gray-900 font-bold font-mono">{user?.playerId}</p>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Role</label>
-                <p className="text-gray-900 font-semibold capitalize">{user?.role}</p>
+              <div className="p-3 bg-gray-50/80 rounded-xl border border-gray-100">
+                <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Role</label>
+                <p className="text-xs text-gray-900 font-bold capitalize">{user?.role}</p>
               </div>
             </div>
           </GlassCard>
 
-          {/* Competition History */}
-          <GlassCard className="p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h3>
-            <div className="space-y-3">
+          {/* Recent Activity */}
+          <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card space-y-4">
+            <h3 className="text-base font-bold text-gray-900 tracking-tight">Recent Activity</h3>
+            <div className="space-y-2">
               {results.slice(0, 5).map((result) => (
-                <div key={result._id.toString()} className="flex items-center gap-4 p-3 bg-white/50 rounded-xl">
-                  <div className="w-10 h-10 bg-brand-lighter rounded-lg flex items-center justify-center">
-                    <Award className="w-5 h-5 text-brand-primary" />
+                <div key={result._id.toString()} className="flex items-center gap-3 p-3 bg-gray-50/80 rounded-xl border border-gray-100">
+                  <div className="w-8 h-8 bg-brand-lighter/60 rounded-lg flex items-center justify-center shrink-0">
+                    <Award className="w-4 h-4 text-brand-primary" />
                   </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-gray-900">
                       {result.type === 'practice' ? 'Practice Set' : result.type === 'test' ? 'Test' : 'Competition'}
                     </p>
-                    <p className="text-sm text-gray-600">
-                      Score: {result.score} • Accuracy: {result.accuracy}%
+                    <p className="text-[10px] text-gray-400">
+                      Score: {result.score} · Accuracy: {result.accuracy}%
                     </p>
                   </div>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-[10px] text-gray-400 shrink-0">
                     {new Date(result.completedAt).toLocaleDateString()}
                   </span>
                 </div>
               ))}
               {results.length === 0 && (
-                <div className="text-center py-6 text-gray-500">
+                <div className="text-center py-6 text-xs text-gray-400">
                   No recent activity
                 </div>
               )}

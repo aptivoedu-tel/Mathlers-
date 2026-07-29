@@ -2,7 +2,10 @@ import { auth } from '@/lib/auth/auth';
 import { redirect } from 'next/navigation';
 import connectDB from '@/lib/db/mongodb';
 import ResultModel, { IResult } from '@/models/Result';
-import Card from '@/components/ui/Card';
+import GlassCard from '@/components/ui/GlassCard';
+import PageHeader from '@/components/ui/PageHeader';
+import StatCard from '@/components/ui/StatCard';
+import { BarChart3, Target, TrendingUp, CheckCircle2 } from 'lucide-react';
 
 type ResultSummary = Pick<IResult, 'score' | 'totalMarks' | 'accuracy' | 'type' | 'completedAt'> & {
   _id: { toString(): string };
@@ -41,72 +44,65 @@ export default async function AnalyticsPage() {
   const recentResults = results.slice(0, 10);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Performance Analytics</h1>
+    <div className="space-y-6 animate-fade-in pb-12">
+      <PageHeader
+        title="Performance Analytics"
+        subtitle="Track your scores, accuracy trends, and subject performance over time."
+        breadcrumbs={[
+          { label: 'Student', href: '/student/dashboard' },
+          { label: 'Analytics' }
+        ]}
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card className="p-6">
-          <p className="text-sm text-gray-600 mb-2">Total Tests</p>
-          <p className="text-3xl font-bold text-gray-900">{totalTests}</p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm text-gray-600 mb-2">Total Score</p>
-          <p className="text-3xl font-bold text-gray-900">{totalScore}</p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm text-gray-600 mb-2">Average Accuracy</p>
-          <p className="text-3xl font-bold text-gray-900">{averageAccuracy}%</p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm text-gray-600 mb-2">Success Rate</p>
-          <p className="text-3xl font-bold text-gray-900">
-            {totalPossible > 0 ? Math.round((totalScore / totalPossible) * 100) : 0}%
-          </p>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+        <StatCard icon={<BarChart3 className="w-5 h-5 text-brand-primary" />} value={totalTests} label="Total Tests" />
+        <StatCard icon={<TrendingUp className="w-5 h-5 text-brand-primary" />} value={totalScore} label="Total Score" />
+        <StatCard icon={<Target className="w-5 h-5 text-brand-primary" />} value={`${averageAccuracy}%`} label="Avg Accuracy" />
+        <StatCard icon={<CheckCircle2 className="w-5 h-5 text-brand-primary" />} value={`${totalPossible > 0 ? Math.round((totalScore / totalPossible) * 100) : 0}%`} label="Success Rate" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <Card className="p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Subject Performance</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card space-y-4">
+          <h2 className="text-base font-bold text-gray-900 tracking-tight">Subject Performance</h2>
           <div className="space-y-4">
             {Object.entries(subjectPerformance).map(([subject, data]) => (
               <div key={subject}>
                 <div className="flex justify-between mb-2">
-                  <span className="text-gray-700">{subject}</span>
-                  <span className="font-semibold">{Math.round(data.total / data.count)} avg</span>
+                  <span className="text-xs font-semibold text-gray-700">{subject}</span>
+                  <span className="text-xs font-bold text-gray-900">{Math.round(data.total / data.count)} avg</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-gray-100 rounded-full h-1.5">
                   <div
-                    className="bg-red-primary h-2 rounded-full"
+                    className="bg-brand-primary h-1.5 rounded-full transition-all"
                     style={{ width: `${Math.min(100, (data.total / data.count) / 10)}%` }}
                   />
                 </div>
               </div>
             ))}
           </div>
-        </Card>
+        </GlassCard>
 
-        <Card className="p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Performance</h2>
-          <div className="space-y-3">
+        <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card space-y-4">
+          <h2 className="text-base font-bold text-gray-900 tracking-tight">Recent Performance</h2>
+          <div className="space-y-2">
             {recentResults.map((result) => (
-              <div key={result._id.toString()} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+              <div key={result._id.toString()} className="flex justify-between items-center p-3 bg-gray-50/80 rounded-xl border border-gray-100">
                 <div>
-                  <p className="font-medium text-gray-900">
+                  <p className="text-xs font-bold text-gray-900">
                     {result.type === 'practice' ? 'Practice' : result.type === 'test' ? 'Test' : 'Competition'}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-[10px] text-gray-400 mt-0.5">
                     {new Date(result.completedAt).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-gray-900">{result.score}</p>
-                  <p className="text-xs text-gray-500">{result.accuracy}% accuracy</p>
+                  <p className="text-sm font-bold text-gray-900">{result.score}</p>
+                  <p className="text-[10px] text-gray-400">{result.accuracy}% accuracy</p>
                 </div>
               </div>
             ))}
           </div>
-        </Card>
+        </GlassCard>
       </div>
     </div>
   );

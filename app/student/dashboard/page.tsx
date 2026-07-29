@@ -8,7 +8,10 @@ import CompetitionModel, { CompetitionStatus } from '@/models/Competition';
 import GlassCard from '@/components/ui/GlassCard';
 import StatCard from '@/components/ui/StatCard';
 import PrimaryButton from '@/components/ui/PrimaryButton';
-import { Flame, Trophy, Target, TrendingUp, Bell } from 'lucide-react';
+import PageHeader from '@/components/ui/PageHeader';
+import StatusChip from '@/components/ui/StatusChip';
+import IconCircle from '@/components/ui/IconCircle';
+import { Flame, Trophy, Target, TrendingUp, Bell, ChevronRight, Zap, PlayCircle, KeyRound } from 'lucide-react';
 import { isValidObjectId } from '@/lib/utils/isValidObjectId';
 
 type ResultRow = {
@@ -36,7 +39,7 @@ type UpcomingCompetitionRow = {
 
 export default async function StudentDashboard() {
   const session = await auth();
-  
+
   if (!session) {
     redirect('/sign-in');
   }
@@ -80,139 +83,175 @@ export default async function StudentDashboard() {
   const startDate = upcomingComp?.schedule?.competitionStartDate || upcomingComp?.competition?.startDate;
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            {greeting}, {session.user.name} 👋
-          </h1>
-          <p className="text-lg text-gray-600">Ready for today&apos;s challenge?</p>
-        </div>
-        <div className="flex gap-4">
-          <Link href="/student/notifications" className="p-3 bg-white/80 backdrop-blur-md rounded-xl hover:bg-white transition-all">
-            <Bell className="w-6 h-6 text-gray-700" />
-          </Link>
-          <Link href="/student/profile" className="w-12 h-12 bg-brand-primary rounded-xl flex items-center justify-center text-white font-bold text-xl">
-            {session.user.name?.charAt(0)}
-          </Link>
-        </div>
-      </div>
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          icon={<Trophy className="w-6 h-6 text-brand-primary" />}
-          value={totalPoints.toLocaleString()}
-          label="Total Points"
-        />
-        <StatCard
-          icon={<Target className="w-6 h-6 text-brand-primary" />}
-          value={results.length}
-          label="Tests Taken"
-        />
-        <StatCard
-          icon={<TrendingUp className="w-6 h-6 text-brand-primary" />}
-          value={`${accuracy}%`}
-          label="Accuracy"
-        />
-        <StatCard
-          icon={<Flame className="w-6 h-6 text-brand-primary" />}
-          value={enrollments.length}
-          label="Competitions"
-        />
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Upcoming Competition */}
-        {upcomingComp ? (
-          <GlassCard className="lg:col-span-2 p-8 bg-gradient-to-br from-brand-primary to-brand-dark text-white">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <span className="text-sm font-medium opacity-90">Featured Competition</span>
-                <h2 className="text-3xl font-bold mt-2">{upcomingComp.name}</h2>
-              </div>
-              <div className="text-right">
-                <p className="text-sm opacity-90">Starts</p>
-                <p className="font-semibold">{startDate ? new Date(startDate).toLocaleDateString() : 'TBA'}</p>
-              </div>
-            </div>
-            <div className="flex gap-6 mb-6">
-              <div>
-                <p className="text-sm opacity-90">Participants</p>
-                <p className="font-semibold">{upcomingComp.analytics?.totalRegistrations ?? upcomingComp.analytics?.registrations ?? 0}</p>
-              </div>
-              <div>
-                <p className="text-sm opacity-90">Sections</p>
-                <p className="font-semibold">{upcomingComp.sections?.length ?? upcomingComp.rounds?.length ?? 0}</p>
-              </div>
-              <div>
-                <p className="text-sm opacity-90">Status</p>
-                <p className="font-semibold text-green-300 capitalize">{String(upcomingComp.status).replace(/_/g, ' ')}</p>
-              </div>
-            </div>
-            <Link href={`/student/competitions/${upcomingComp._id.toString()}`}>
-              <PrimaryButton variant="secondary" className="w-full">
-                View Competition →
-              </PrimaryButton>
+    <div className="space-y-8 animate-fade-in pb-12">
+      {/* ─── Page Header ─── */}
+      <PageHeader
+        title={`${greeting}, ${session.user.name} 👋`}
+        subtitle="Ready for today's math challenge and practice sessions?"
+        actions={
+          <div className="flex items-center gap-3">
+            <Link
+              href="/student/notifications"
+              className="w-9 h-9 rounded-full bg-white border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-gray-500 shadow-xs transition"
+              title="Notifications"
+            >
+              <Bell className="w-4 h-4" />
             </Link>
-          </GlassCard>
-        ) : (
-          <GlassCard className="lg:col-span-2 p-8">
-            <div className="text-center py-8">
-              <Trophy className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-xl font-bold text-gray-900 mb-2">No Upcoming Competitions</h3>
-              <p className="text-gray-600 mb-4">Check back later for new competitions</p>
-              <Link href="/student/competitions">
-                <PrimaryButton variant="secondary">View All Competitions</PrimaryButton>
+            <Link
+              href="/student/profile"
+              className="w-9 h-9 bg-brand-primary text-white font-bold text-sm rounded-full flex items-center justify-center shadow-sm"
+              title="Profile"
+            >
+              {session.user.name?.charAt(0)}
+            </Link>
+          </div>
+        }
+      />
+
+      {/* ─── Metric Stat Cards ─── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <StatCard
+          icon={<Trophy className="w-5 h-5 text-brand-primary" />}
+          value={totalPoints.toLocaleString()}
+          label="Total Score Points"
+          trend="+150 pts"
+        />
+        <StatCard
+          icon={<Target className="w-5 h-5 text-brand-primary" />}
+          value={results.length}
+          label="Tests & Quizzes Taken"
+        />
+        <StatCard
+          icon={<TrendingUp className="w-5 h-5 text-brand-primary" />}
+          value={`${accuracy}%`}
+          label="Average Accuracy"
+          trend="+4%"
+        />
+        <StatCard
+          icon={<Flame className="w-5 h-5 text-brand-primary" />}
+          value={enrollments.length}
+          label="Joined Competitions"
+        />
+      </div>
+
+      {/* ─── Featured Competition & Quick Actions Row ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Featured Competition Card */}
+        {upcomingComp ? (
+          <GlassCard className="lg:col-span-2 p-6 bg-white border border-gray-200/90 shadow-card space-y-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className="text-xs font-semibold text-brand-primary uppercase tracking-wider">Featured Competition</span>
+                <h2 className="text-2xl font-bold text-gray-900 tracking-tight mt-1">{upcomingComp.name}</h2>
+              </div>
+              <StatusChip variant="info">
+                {String(upcomingComp.status).replace(/_/g, ' ')}
+              </StatusChip>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50/80 rounded-xl border border-gray-100">
+              <div>
+                <p className="text-xs text-gray-400 font-medium">Starts On</p>
+                <p className="text-sm font-semibold text-gray-800">{startDate ? new Date(startDate).toLocaleDateString() : 'TBA'}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 font-medium font-medium">Participants</p>
+                <p className="text-sm font-semibold text-gray-800">{upcomingComp.analytics?.totalRegistrations ?? upcomingComp.analytics?.registrations ?? 0}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 font-medium">Sections</p>
+                <p className="text-sm font-semibold text-gray-800">{upcomingComp.sections?.length ?? upcomingComp.rounds?.length ?? 0}</p>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Link href={`/student/competitions/${upcomingComp._id.toString()}`}>
+                <PrimaryButton className="gap-2">
+                  View Competition <ChevronRight className="w-4 h-4" />
+                </PrimaryButton>
               </Link>
             </div>
+          </GlassCard>
+        ) : (
+          <GlassCard className="lg:col-span-2 p-8 bg-white border border-gray-200/90 shadow-card text-center flex flex-col items-center justify-center">
+            <IconCircle icon={Trophy} size="xl" variant="brand" className="mb-4" />
+            <h3 className="text-lg font-bold text-gray-900 mb-1">No Upcoming Competitions</h3>
+            <p className="text-xs text-gray-500 mb-5 max-w-sm">Check back later or browse available practice sets to sharpen your skills.</p>
+            <Link href="/student/competitions">
+              <PrimaryButton variant="secondary">Browse Competitions</PrimaryButton>
+            </Link>
           </GlassCard>
         )}
 
         {/* Quick Actions */}
-        <GlassCard className="p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
+        <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card space-y-4">
+          <h3 className="text-lg font-bold text-gray-900 tracking-tight">Quick Actions</h3>
           <div className="space-y-3">
-            <Link href="/student/competitions/join">
-              <PrimaryButton className="w-full">🏷 Join with Code</PrimaryButton>
+            <Link href="/student/competitions/join" className="block">
+              <div className="p-3.5 bg-gray-50 hover:bg-gray-100/80 border border-gray-200/60 rounded-xl transition flex items-center gap-3 group">
+                <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition">
+                  <KeyRound className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-gray-900">Join with Code</p>
+                  <p className="text-[11px] text-gray-500">Enter competition pass key</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+              </div>
             </Link>
-            <Link href="/student/competitions">
-              <PrimaryButton variant="secondary" className="w-full">Browse Competitions</PrimaryButton>
+
+            <Link href="/student/practice" className="block">
+              <div className="p-3.5 bg-gray-50 hover:bg-gray-100/80 border border-gray-200/60 rounded-xl transition flex items-center gap-3 group">
+                <div className="w-9 h-9 rounded-lg bg-brand-lighter/60 text-brand-primary flex items-center justify-center group-hover:scale-105 transition">
+                  <PlayCircle className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-gray-900">Start Practice</p>
+                  <p className="text-[11px] text-gray-500">Solve daily problem sets</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+              </div>
             </Link>
-            <Link href="/student/practice">
-              <PrimaryButton variant="secondary" className="w-full">Start Practice</PrimaryButton>
+
+            <Link href="/student/competitions" className="block">
+              <div className="p-3.5 bg-gray-50 hover:bg-gray-100/80 border border-gray-200/60 rounded-xl transition flex items-center gap-3 group">
+                <div className="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-105 transition">
+                  <Trophy className="w-4 h-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-gray-900">Browse Events</p>
+                  <p className="text-[11px] text-gray-500">See all active tournaments</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+              </div>
             </Link>
           </div>
         </GlassCard>
       </div>
 
-      {/* Recent Activity */}
-      <GlassCard className="p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Activity</h2>
-        <div className="space-y-4">
+      {/* ─── Recent Activity ─── */}
+      <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card space-y-4">
+        <h2 className="text-lg font-bold text-gray-900 tracking-tight">Recent Activity</h2>
+        <div className="space-y-3">
           {results.map((result) => (
-            <div key={result._id.toString()} className="flex items-center gap-4 p-4 bg-white/50 rounded-xl">
-              <div className="w-12 h-12 bg-brand-lighter rounded-xl flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-brand-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-gray-900">
+            <div key={result._id.toString()} className="flex items-center gap-4 p-3.5 bg-gray-50/70 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
+              <IconCircle icon={Trophy} variant="brand" size="md" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-gray-900">
                   {result.type === 'practice' ? 'Practice Set' : result.type === 'test' ? 'Test' : 'Competition'}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-[11px] text-gray-500">
                   Score: {result.score} • Accuracy: {result.accuracy}%
                 </p>
               </div>
-              <span className="text-sm text-gray-500">
+              <StatusChip variant="success">
                 {result.completedAt ? new Date(result.completedAt).toLocaleDateString() : 'Recently'}
-              </span>
+              </StatusChip>
             </div>
           ))}
           {results.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              No recent activity. Start practicing to see your progress!
+            <div className="text-center py-10 text-gray-400 text-xs font-medium">
+              No recent activity. Start practicing to see your progress here!
             </div>
           )}
         </div>

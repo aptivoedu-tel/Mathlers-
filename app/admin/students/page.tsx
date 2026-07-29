@@ -3,7 +3,10 @@ import { redirect } from 'next/navigation';
 import connectDB from '@/lib/db/mongodb';
 import UserModel, { UserRole } from '@/models/User';
 import GlassCard from '@/components/ui/GlassCard';
-import { Users } from 'lucide-react';
+import PageHeader from '@/components/ui/PageHeader';
+import StatusChip from '@/components/ui/StatusChip';
+import EmptyState from '@/components/ui/EmptyState';
+import { Users, Search, Filter } from 'lucide-react';
 
 type StudentRow = {
   _id: { toString(): string };
@@ -17,7 +20,7 @@ type StudentRow = {
 
 export default async function StudentsPage() {
   const session = await auth();
-  
+
   if (!session || !isAdmin(session.user.role)) {
     redirect('/sign-in');
   }
@@ -33,66 +36,74 @@ export default async function StudentsPage() {
     .lean<StudentRow[]>();
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Students</h1>
-          <p className="text-gray-600">Review active student accounts{isSuperAdmin(session.user.role) ? '.' : ' at your school.'}</p>
-        </div>
-      </div>
-
-      {/* Students Table */}
-      <GlassCard className="p-6">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-4 px-4 font-semibold text-gray-700">Student</th>
-                <th className="text-left py-4 px-4 font-semibold text-gray-700">Email</th>
-                <th className="text-left py-4 px-4 font-semibold text-gray-700">Player ID</th>
-                <th className="text-left py-4 px-4 font-semibold text-gray-700">Role</th>
-                <th className="text-left py-4 px-4 font-semibold text-gray-700">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student) => (
-                <tr key={student._id.toString()} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-4 px-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-brand-lighter rounded-full flex items-center justify-center text-brand-primary font-bold">
-                        {student.fullName?.charAt(0) || 'U'}
-                      </div>
-                      <p className="font-medium text-gray-900">{student.fullName}</p>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4 text-gray-600">{student.email}</td>
-                  <td className="py-4 px-4 text-gray-600">{student.playerId}</td>
-                  <td className="py-4 px-4">
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm capitalize">
-                      {student.role}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className={`px-3 py-1 rounded-full text-sm ${
-                      student.isActive && !student.isSuspended ? 'bg-green-100 text-green-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>
-                      {student.isActive && !student.isSuspended ? 'Active' : 'Suspended'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {students.length === 0 && (
-          <div className="text-center py-12">
-            <Users className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-            <p className="text-gray-600 mb-2">No students found</p>
-            <p className="text-sm text-gray-500">Add your first student to get started</p>
+    <div className="space-y-6 animate-fade-in pb-12">
+      <PageHeader
+        title="Students Directory"
+        subtitle={`Review and manage registered student accounts${isSuperAdmin(session.user.role) ? ' across all schools' : ' at your school'}.`}
+        breadcrumbs={[
+          { label: 'Admin', href: '/admin/dashboard' },
+          { label: 'Students' }
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full">
+              Total: {students.length}
+            </span>
           </div>
+        }
+      />
+
+      <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card space-y-4">
+        <div className="flex items-center justify-between gap-4 pb-2">
+          <h2 className="text-base font-bold text-gray-900 tracking-tight">Active Students</h2>
+        </div>
+
+        {students.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-gray-100 text-gray-400 font-semibold uppercase tracking-wider">
+                  <th className="py-3 px-3">Student Name</th>
+                  <th className="py-3 px-3">Email Address</th>
+                  <th className="py-3 px-3">Player ID</th>
+                  <th className="py-3 px-3">Role</th>
+                  <th className="py-3 px-3">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 text-gray-700">
+                {students.map((student) => (
+                  <tr key={student._id.toString()} className="hover:bg-gray-50/80 transition">
+                    <td className="py-3 px-3 font-semibold text-gray-900">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-brand-lighter/60 text-brand-primary font-bold text-xs flex items-center justify-center">
+                          {student.fullName?.charAt(0) || 'S'}
+                        </div>
+                        <span>{student.fullName}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-gray-500">{student.email}</td>
+                    <td className="py-3 px-3 font-mono text-gray-600">{student.playerId || 'N/A'}</td>
+                    <td className="py-3 px-3">
+                      <StatusChip variant="info">{student.role || 'student'}</StatusChip>
+                    </td>
+                    <td className="py-3 px-3">
+                      {student.isActive && !student.isSuspended ? (
+                        <StatusChip variant="success">Active</StatusChip>
+                      ) : (
+                        <StatusChip variant="danger">Suspended</StatusChip>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <EmptyState
+            icon="file"
+            title="No Students Found"
+            description="There are currently no active students registered in the system."
+          />
         )}
       </GlassCard>
     </div>

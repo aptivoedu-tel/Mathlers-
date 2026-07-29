@@ -4,7 +4,11 @@ import connectDB from '@/lib/db/mongodb';
 import ResultModel from '@/models/Result';
 import { IUser } from '@/models/User';
 import GlassCard from '@/components/ui/GlassCard';
-import { Award } from 'lucide-react';
+import PageHeader from '@/components/ui/PageHeader';
+import StatCard from '@/components/ui/StatCard';
+import StatusChip from '@/components/ui/StatusChip';
+import EmptyState from '@/components/ui/EmptyState';
+import { Award, BarChart3, Users, CheckCircle2 } from 'lucide-react';
 
 export default async function ResultsPage() {
   const session = await auth();
@@ -21,70 +25,77 @@ export default async function ResultsPage() {
     .limit(50)
     .lean();
 
+  const avgAccuracy = results.length > 0
+    ? Math.round(results.reduce((sum, r) => sum + (r.accuracy || 0), 0) / results.length)
+    : 0;
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Results</h1>
-          <p className="text-gray-600">Latest recorded practice and competition results.</p>
-        </div>
+    <div className="mx-auto max-w-7xl space-y-6 animate-fade-in pb-12">
+      <PageHeader
+        title="Results"
+        subtitle="Latest recorded practice and competition results across all students."
+        breadcrumbs={[
+          { label: 'Admin', href: '/admin/dashboard' },
+          { label: 'Results' }
+        ]}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <StatCard icon={<Award className="w-5 h-5 text-brand-primary" />} value={results.length} label="Total Results" />
+        <StatCard icon={<BarChart3 className="w-5 h-5 text-brand-primary" />} value={`${avgAccuracy}%`} label="Avg Accuracy" />
+        <StatCard icon={<Users className="w-5 h-5 text-brand-primary" />} value={new Set(results.map(r => String(r.student?.playerId || '')).filter(Boolean)).size} label="Active Students" />
       </div>
 
-      {/* Results Table */}
-      <GlassCard className="p-6">
+      <GlassCard className="p-0 bg-white border border-gray-200/90 shadow-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-4 px-4 font-semibold text-gray-700">Student</th>
-                <th className="text-left py-4 px-4 font-semibold text-gray-700">Type</th>
-                <th className="text-left py-4 px-4 font-semibold text-gray-700">Score</th>
-                <th className="text-left py-4 px-4 font-semibold text-gray-700">Accuracy</th>
-                <th className="text-left py-4 px-4 font-semibold text-gray-700">Time</th>
-                <th className="text-left py-4 px-4 font-semibold text-gray-700">Date</th>
+              <tr className="border-b border-gray-100 bg-gray-50/80">
+                <th className="text-left py-3 px-5 text-[10px] font-bold uppercase tracking-wider text-gray-400">Student</th>
+                <th className="text-left py-3 px-5 text-[10px] font-bold uppercase tracking-wider text-gray-400">Type</th>
+                <th className="text-left py-3 px-5 text-[10px] font-bold uppercase tracking-wider text-gray-400">Score</th>
+                <th className="text-left py-3 px-5 text-[10px] font-bold uppercase tracking-wider text-gray-400">Accuracy</th>
+                <th className="text-left py-3 px-5 text-[10px] font-bold uppercase tracking-wider text-gray-400">Time</th>
+                <th className="text-left py-3 px-5 text-[10px] font-bold uppercase tracking-wider text-gray-400">Date</th>
               </tr>
             </thead>
             <tbody>
               {results.map((result) => (
-                <tr key={result._id.toString()} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-4 px-4">
+                <tr key={result._id.toString()} className="border-b border-gray-50 hover:bg-gray-50/60 transition">
+                  <td className="py-3.5 px-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-brand-lighter rounded-full flex items-center justify-center text-brand-primary font-bold">
+                      <div className="w-8 h-8 bg-brand-lighter/60 rounded-xl flex items-center justify-center text-brand-primary text-xs font-bold">
                         {result.student?.fullName?.charAt(0) || 'U'}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{result.student?.fullName || 'Unknown'}</p>
-                        <p className="text-sm text-gray-500">{result.student?.playerId}</p>
+                        <p className="text-xs font-bold text-gray-900">{result.student?.fullName || 'Unknown'}</p>
+                        <p className="text-[10px] text-gray-400">{result.student?.playerId}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="py-4 px-4">
-                    <span className={`px-3 py-1 rounded-full text-sm capitalize ${
-                      result.type === 'practice' ? 'bg-blue-100 text-blue-700' :
-                      result.type === 'test' ? 'bg-purple-100 text-purple-700' :
-                      'bg-green-100 text-green-700'
-                    }`}>
+                  <td className="py-3.5 px-5">
+                    <StatusChip variant={
+                      result.type === 'practice' ? 'info' :
+                      result.type === 'test' ? 'warning' :
+                      'success'
+                    }>
                       {result.type}
-                    </span>
+                    </StatusChip>
                   </td>
-                  <td className="py-4 px-4">
-                    <div className="flex items-center gap-2">
-                      <Award className="w-4 h-4 text-brand-primary" />
-                      <span className="font-semibold text-gray-900">{result.score}/{result.totalMarks || 100}</span>
-                    </div>
+                  <td className="py-3.5 px-5">
+                    <span className="text-xs font-bold text-gray-900">{result.score}/{result.totalMarks || 100}</span>
                   </td>
-                  <td className="py-4 px-4">
-                    <span className={`font-semibold ${
-                      result.accuracy >= 80 ? 'text-green-600' :
-                      result.accuracy >= 60 ? 'text-yellow-600' :
+                  <td className="py-3.5 px-5">
+                    <span className={`text-xs font-bold ${
+                      result.accuracy >= 80 ? 'text-emerald-600' :
+                      result.accuracy >= 60 ? 'text-amber-600' :
                       'text-red-600'
                     }`}>
                       {result.accuracy}%
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-gray-600">{result.timeTaken || 'N/A'}</td>
-                  <td className="py-4 px-4 text-gray-600">
+                  <td className="py-3.5 px-5 text-xs text-gray-500">{result.timeTaken || 'N/A'}</td>
+                  <td className="py-3.5 px-5 text-xs text-gray-500">
                     {new Date(result.completedAt).toLocaleDateString()}
                   </td>
                 </tr>
@@ -94,10 +105,12 @@ export default async function ResultsPage() {
         </div>
 
         {results.length === 0 && (
-          <div className="text-center py-12">
-            <Award className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-            <p className="text-gray-600 mb-2">No results found</p>
-            <p className="text-sm text-gray-500">Results will appear here as students complete tests</p>
+          <div className="p-6">
+            <EmptyState
+              icon="file"
+              title="No Results Found"
+              description="Results will appear here as students complete tests and practice sets."
+            />
           </div>
         )}
       </GlassCard>

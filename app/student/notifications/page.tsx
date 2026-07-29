@@ -1,6 +1,8 @@
 import { auth } from '@/lib/auth/auth';
 import { redirect } from 'next/navigation';
-import Card from '@/components/ui/Card';
+import GlassCard from '@/components/ui/GlassCard';
+import PageHeader from '@/components/ui/PageHeader';
+import EmptyState from '@/components/ui/EmptyState';
 
 export default async function NotificationsPage() {
   const session = await auth();
@@ -10,13 +12,23 @@ export default async function NotificationsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Notifications</h1>
+    <div className="space-y-6 animate-fade-in pb-12">
+      <PageHeader
+        title="Notifications"
+        subtitle="Stay updated with competition alerts, results, and platform announcements."
+        breadcrumbs={[
+          { label: 'Student', href: '/student/dashboard' },
+          { label: 'Notifications' }
+        ]}
+      />
 
-      <Card className="p-12 text-center">
-        <p className="text-gray-600">No notifications yet.</p>
-        <p className="mt-2 text-sm text-gray-500">Competition registration and result alerts will appear here when notifications are enabled.</p>
-      </Card>
+      <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card">
+        <EmptyState
+          icon="file"
+          title="No Notifications Yet"
+          description="Competition registration and result alerts will appear here when notifications are enabled."
+        />
+      </GlassCard>
     </div>
   );
 }

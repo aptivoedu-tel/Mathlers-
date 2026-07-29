@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { BookOpen, Check, Pencil, Plus, Tags, Trash2, X, GraduationCap } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
+import PageHeader from '@/components/ui/PageHeader';
+import PrimaryButton from '@/components/ui/PrimaryButton';
 
 type Subject = { _id: string; name: string; code: string; grades?: Grade[]; description?: string; color?: string; order: number; isActive: boolean };
 type Grade = { _id: string; name: string; code: string; order: number; isActive: boolean };
@@ -165,30 +167,30 @@ export default function ContentPage() {
   const setSubtopic = (index: number, field: keyof Subtopic, value: string) => setTopicForm((form) => ({ ...form, subtopics: form.subtopics.map((item, itemIndex) => itemIndex === index ? { ...item, [field]: value } : item) }));
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
-      <div className="flex flex-col gap-5 border-b border-gray-200 pb-7 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-brand-primary">Question bank structure</p>
-          <h1 className="mt-1 text-3xl font-bold text-gray-950">Subjects, Grades & Topics</h1>
-          <p className="mt-2 max-w-2xl text-gray-600">Build the taxonomy used when authors create questions and competitions.</p>
-        </div>
-        <button
-          onClick={() => section === 'subjects' ? openSubject() : section === 'grades' ? openGrade() : openTopic()}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-primary px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-brand-dark"
-        >
-          <Plus className="h-4 w-4" /> Add {section === 'subjects' ? 'Subject' : section === 'grades' ? 'Grade' : 'Topic'}
-        </button>
-      </div>
+    <div className="mx-auto max-w-7xl space-y-6 animate-fade-in pb-12">
+      <PageHeader
+        title="Subjects, Grades & Topics"
+        subtitle="Build the taxonomy used when authors create questions and competitions."
+        breadcrumbs={[
+          { label: 'Admin', href: '/admin/dashboard' },
+          { label: 'Content' }
+        ]}
+        actions={
+          <PrimaryButton size="sm" onClick={() => section === 'subjects' ? openSubject() : section === 'grades' ? openGrade() : openTopic()}>
+            <Plus className="mr-1.5 h-3.5 w-3.5" /> Add {section === 'subjects' ? 'Subject' : section === 'grades' ? 'Grade' : 'Topic'}
+          </PrimaryButton>
+        }
+      />
 
-      <div className="flex w-fit gap-1 rounded-lg border border-gray-200 bg-gray-50 p-1">
-        <button onClick={() => setSection('subjects')} className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold ${section === 'subjects' ? 'bg-white text-gray-950 shadow-sm' : 'text-gray-600'}`}>
-          <BookOpen className="h-4 w-4" /> Subjects ({subjects.length})
+      <div className="flex gap-2">
+        <button onClick={() => setSection('subjects')} className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${section === 'subjects' ? 'bg-brand-primary text-white shadow-xs' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}>
+          <BookOpen className="h-3.5 w-3.5" /> Subjects ({subjects.length})
         </button>
-        <button onClick={() => setSection('grades')} className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold ${section === 'grades' ? 'bg-white text-gray-950 shadow-sm' : 'text-gray-600'}`}>
-          <GraduationCap className="h-4 w-4" /> Grades ({grades.length})
+        <button onClick={() => setSection('grades')} className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${section === 'grades' ? 'bg-brand-primary text-white shadow-xs' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}>
+          <GraduationCap className="h-3.5 w-3.5" /> Grades ({grades.length})
         </button>
-        <button onClick={() => setSection('topics')} className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold ${section === 'topics' ? 'bg-white text-gray-950 shadow-sm' : 'text-gray-600'}`}>
-          <Tags className="h-4 w-4" /> Topics ({topics.length})
+        <button onClick={() => setSection('topics')} className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${section === 'topics' ? 'bg-brand-primary text-white shadow-xs' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}>
+          <Tags className="h-3.5 w-3.5" /> Topics ({topics.length})
         </button>
       </div>
 

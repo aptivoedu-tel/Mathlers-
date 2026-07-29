@@ -6,6 +6,7 @@ import GlassCard from '@/components/ui/GlassCard';
 import PrimaryButton from '@/components/ui/PrimaryButton';
 import Modal from '@/components/ui/Modal';
 import QuestionForm from '@/components/forms/admin/QuestionForm';
+import PageHeader from '@/components/ui/PageHeader';
 import { AlertCircle, BarChart3, CheckCircle2, Download, Edit, FileSpreadsheet, Filter, Layers3, Plus, Search, Trash2, Upload, X } from 'lucide-react';
 
 interface QuestionFormData {
@@ -474,33 +475,35 @@ export default function QuestionsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6 animate-fade-in pb-12">
       {/* Header */}
-      <div className="flex flex-col gap-5 border-b border-gray-200 pb-7 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-brand-primary">Content operations</p>
-          <h1 className="mt-1 text-3xl font-bold text-gray-950">Question bank</h1>
-          <p className="mt-2 text-gray-600">{pagination.total} questions across your configured subjects, topics, and subtopics.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".csv,.json,application/json,text/csv"
-            className="hidden"
-            onChange={handleBulkFileSelect}
-          />
-          <button onClick={() => setIsUploadOpen(true)} disabled={bulkUploading} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50">
-            <Upload className="h-4 w-4" /> Upload file
-          </button>
-          <Link href="/admin/content" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"><Layers3 className="h-4 w-4" /> Manage curriculum</Link>
-          <Link href="/admin/analytics/questions" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"><BarChart3 className="h-4 w-4" /> Analytics</Link>
-          <PrimaryButton onClick={() => setIsFormOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Question
-          </PrimaryButton>
-        </div>
-      </div>
+      <PageHeader
+        title="Question Bank"
+        subtitle={`${pagination.total} questions across configured subjects, topics, and subtopics.`}
+        breadcrumbs={[
+          { label: 'Admin', href: '/admin/dashboard' },
+          { label: 'Question Bank' }
+        ]}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,.json,application/json,text/csv"
+              className="hidden"
+              onChange={handleBulkFileSelect}
+            />
+            <button onClick={() => setIsUploadOpen(true)} disabled={bulkUploading} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 shadow-xs disabled:opacity-50">
+              <Upload className="h-3.5 w-3.5" /> Upload File
+            </button>
+            <Link href="/admin/content" className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 shadow-xs"><Layers3 className="h-3.5 w-3.5" /> Curriculum</Link>
+            <PrimaryButton size="sm" onClick={() => setIsFormOpen(true)}>
+              <Plus className="w-3.5 h-3.5 mr-1" />
+              Add Question
+            </PrimaryButton>
+          </div>
+        }
+      />
 
       {notice && <div className="flex items-center justify-between rounded-lg border border-brand-primary/20 bg-brand-lighter/40 px-4 py-3 text-sm text-gray-800"><span>{notice}</span><button onClick={() => setNotice('')} className="font-semibold text-brand-primary">Dismiss</button></div>}
 

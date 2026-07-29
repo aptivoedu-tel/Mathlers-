@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import GlassCard from '@/components/ui/GlassCard';
 import PrimaryButton from '@/components/ui/PrimaryButton';
+import PageHeader from '@/components/ui/PageHeader';
 import { Trophy, Calendar, Users, Layers, Tag, CheckCircle2, Search, Download, X } from 'lucide-react';
 import Link from 'next/link';
 import JoinWithCodeSection from './JoinWithCodeSection';
@@ -69,43 +70,49 @@ export default function StudentCompetitionCenter({
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 animate-fade-in pb-12">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">🏆 Competition Center</h1>
-          <p className="text-gray-600">Discover, join, and track your performance in Mathlers competitions</p>
-        </div>
-        <button
-          onClick={() => setActiveTab('code')}
-          className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-brand-primary to-brand-dark text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all"
-        >
-          <Tag className="w-5 h-5" /> Join with Code
-        </button>
-      </div>
+      <PageHeader
+        title="Competition Center"
+        subtitle="Discover, join, and track your performance in active Mathlers competitions."
+        breadcrumbs={[
+          { label: 'Student', href: '/student/dashboard' },
+          { label: 'Competitions' }
+        ]}
+        actions={
+          <button
+            onClick={() => setActiveTab('code')}
+            className="flex items-center gap-1.5 px-4 py-2 bg-brand-primary text-white rounded-xl font-semibold text-xs shadow-sm hover:bg-brand-dark transition-all"
+          >
+            <Tag className="w-3.5 h-3.5" /> Join with Code
+          </button>
+        }
+      />
 
       {/* Navigation Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-3">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all ${
-              activeTab === tab.id
-                ? 'bg-brand-primary text-white shadow-md'
-                : 'bg-white/80 text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <span>{tab.label}</span>
-            {tab.count !== undefined && (
-              <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-700'
-              }`}>
-                {tab.count}
-              </span>
-            )}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-2 border-b border-gray-100">
+        <div className="flex gap-2">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-semibold text-xs transition-all ${
+                activeTab === tab.id
+                  ? 'bg-brand-primary text-white shadow-xs'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              <span>{tab.label}</span>
+              {tab.count !== undefined && (
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                  activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Search Bar */}

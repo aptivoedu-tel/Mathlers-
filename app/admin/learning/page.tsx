@@ -1,5 +1,10 @@
 import connectDB from '@/lib/db/mongodb';
 import PracticeSetModel from '@/models/PracticeSet';
+import PageHeader from '@/components/ui/PageHeader';
+import StatCard from '@/components/ui/StatCard';
+import GlassCard from '@/components/ui/GlassCard';
+import StatusChip from '@/components/ui/StatusChip';
+import EmptyState from '@/components/ui/EmptyState';
 import { BookOpen, Clock3, FileQuestion, Layers3 } from 'lucide-react';
 
 export default async function LearningPage() {
@@ -14,35 +19,56 @@ export default async function LearningPage() {
   const published = practiceSets.filter((set) => set.isPublished).length;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
-      <div className="border-b border-gray-200 pb-7">
-        <p className="text-sm font-semibold uppercase tracking-wide text-brand-primary">Practice library</p>
-        <h1 className="mt-1 text-3xl font-bold text-gray-950">Learning</h1>
-        <p className="mt-2 text-gray-600">Review the practice books currently available to Mathlers students.</p>
+    <div className="mx-auto max-w-7xl space-y-6 animate-fade-in pb-12">
+      <PageHeader
+        title="Learning"
+        subtitle="Review the practice books currently available to Mathlers students."
+        breadcrumbs={[
+          { label: 'Admin', href: '/admin/dashboard' },
+          { label: 'Learning' }
+        ]}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <StatCard icon={<Layers3 className="w-5 h-5 text-brand-primary" />} value={practiceSets.length} label="Practice Books" />
+        <StatCard icon={<BookOpen className="w-5 h-5 text-brand-primary" />} value={published} label="Published" />
+        <StatCard icon={<FileQuestion className="w-5 h-5 text-brand-primary" />} value={practiceSets.reduce((total, set) => total + set.questions.length, 0)} label="Questions Included" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Metric icon={<Layers3 />} label="Practice books" value={practiceSets.length} />
-        <Metric icon={<BookOpen />} label="Published" value={published} />
-        <Metric icon={<FileQuestion />} label="Questions included" value={practiceSets.reduce((total, set) => total + set.questions.length, 0)} />
-      </div>
-
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 px-5 py-4"><h2 className="font-bold text-gray-950">Recent practice books</h2></div>
+      <GlassCard className="p-0 bg-white border border-gray-200/90 shadow-card overflow-hidden">
+        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/80">
+          <h2 className="text-xs font-bold text-gray-900 tracking-tight">Recent Practice Books</h2>
+        </div>
         {practiceSets.map((set) => {
           const subject = set.subject as unknown as { name?: string } | null;
           const grade = set.grade as unknown as { name?: string } | null;
-          return <div key={set._id.toString()} className="flex flex-col gap-3 border-b border-gray-100 px-5 py-4 last:border-0 sm:flex-row sm:items-center sm:justify-between">
-            <div><p className="font-semibold text-gray-950">{set.name}</p><p className="mt-1 text-sm text-gray-600">{subject?.name || 'Subject'} · {grade?.name || 'Grade'} · {set.questions.length} questions</p></div>
-            <div className="flex items-center gap-3 text-sm"><span className="flex items-center gap-1 text-gray-500"><Clock3 className="h-4 w-4" /> {Math.round(set.timeLimit / 60)} min</span><span className={`rounded-full px-2.5 py-1 font-semibold ${set.isPublished ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>{set.isPublished ? 'Published' : 'Draft'}</span></div>
-          </div>;
+          return (
+            <div key={set._id.toString()} className="flex flex-col gap-3 border-b border-gray-50 px-5 py-3.5 last:border-0 sm:flex-row sm:items-center sm:justify-between hover:bg-gray-50/60 transition">
+              <div>
+                <p className="text-xs font-bold text-gray-900">{set.name}</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">{subject?.name || 'Subject'} · {grade?.name || 'Grade'} · {set.questions.length} questions</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1 text-[10px] text-gray-400">
+                  <Clock3 className="h-3 w-3" /> {Math.round(set.timeLimit / 60)} min
+                </span>
+                <StatusChip variant={set.isPublished ? 'success' : 'neutral'}>
+                  {set.isPublished ? 'Published' : 'Draft'}
+                </StatusChip>
+              </div>
+            </div>
+          );
         })}
-        {!practiceSets.length && <p className="px-5 py-16 text-center text-sm text-gray-500">No practice books have been created yet.</p>}
-      </div>
+        {!practiceSets.length && (
+          <div className="p-6">
+            <EmptyState
+              icon="file"
+              title="No Practice Books"
+              description="Practice books will appear here once they are created."
+            />
+          </div>
+        )}
+      </GlassCard>
     </div>
   );
-}
-
-function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
-  return <div className="flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-5"><span className="text-brand-primary">{icon}</span><div><p className="text-2xl font-bold text-gray-950">{value}</p><p className="text-sm text-gray-600">{label}</p></div></div>;
 }

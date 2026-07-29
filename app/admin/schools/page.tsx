@@ -3,6 +3,11 @@ import SchoolModel from '@/models/School';
 import UserModel from '@/models/User';
 import { auth, isSuperAdmin } from '@/lib/auth/auth';
 import { redirect } from 'next/navigation';
+import PageHeader from '@/components/ui/PageHeader';
+import StatCard from '@/components/ui/StatCard';
+import GlassCard from '@/components/ui/GlassCard';
+import StatusChip from '@/components/ui/StatusChip';
+import EmptyState from '@/components/ui/EmptyState';
 import { Building2, MapPin, Users } from 'lucide-react';
 
 export default async function SchoolsPage() {
@@ -14,17 +19,57 @@ export default async function SchoolsPage() {
   const activeSchools = schools.filter((school) => school.isActive).length;
   const students = schools.reduce((total, school) => total + school.totalStudents, 0);
 
-  return <div className="mx-auto max-w-7xl space-y-8">
-    <div className="border-b border-gray-200 pb-7"><p className="text-sm font-semibold uppercase tracking-wide text-brand-primary">Partner network</p><h1 className="mt-1 text-3xl font-bold text-gray-950">Schools</h1><p className="mt-2 text-gray-600">Monitor school participation and enrolled Mathlers students.</p></div>
-    <div className="grid gap-4 sm:grid-cols-3"><Metric icon={<Building2 />} label="Schools" value={schools.length} /><Metric icon={<Users />} label="Students" value={students} /><Metric icon={<Building2 />} label="Active schools" value={activeSchools} /></div>
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-      <div className="grid grid-cols-[minmax(180px,1.4fr)_minmax(130px,1fr)_100px_100px] gap-4 border-b border-gray-200 bg-gray-50 px-5 py-3 text-xs font-bold uppercase tracking-wide text-gray-500"><span>School</span><span>Location</span><span>Students</span><span>Status</span></div>
-      {schools.map((school) => <div key={school._id.toString()} className="grid grid-cols-[minmax(180px,1.4fr)_minmax(130px,1fr)_100px_100px] items-center gap-4 border-b border-gray-100 px-5 py-4 last:border-0"><div><p className="font-semibold text-gray-950">{school.name}</p><p className="mt-1 text-sm text-gray-500">{school.coordinatorName || 'No coordinator assigned'}</p></div><span className="flex items-center gap-1.5 text-sm text-gray-600"><MapPin className="h-4 w-4" />{school.city}</span><span className="font-semibold text-gray-800">{school.totalStudents}</span><span className={`w-fit rounded-full px-2.5 py-1 text-xs font-semibold ${school.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>{school.isActive ? 'Active' : 'Inactive'}</span></div>)}
-      {!schools.length && <p className="px-5 py-16 text-center text-sm text-gray-500">No schools have been added yet.</p>}
-    </div>
-  </div>;
-}
+  return (
+    <div className="mx-auto max-w-7xl space-y-6 animate-fade-in pb-12">
+      <PageHeader
+        title="Schools"
+        subtitle="Monitor school participation and enrolled Mathlers students."
+        breadcrumbs={[
+          { label: 'Admin', href: '/admin/dashboard' },
+          { label: 'Schools' }
+        ]}
+      />
 
-function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
-  return <div className="flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-5"><span className="text-brand-primary">{icon}</span><div><p className="text-2xl font-bold text-gray-950">{value}</p><p className="text-sm text-gray-600">{label}</p></div></div>;
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <StatCard icon={<Building2 className="w-5 h-5 text-brand-primary" />} value={schools.length} label="Total Schools" />
+        <StatCard icon={<Users className="w-5 h-5 text-brand-primary" />} value={students} label="Total Students" />
+        <StatCard icon={<Building2 className="w-5 h-5 text-brand-primary" />} value={activeSchools} label="Active Schools" />
+      </div>
+
+      <GlassCard className="p-0 bg-white border border-gray-200/90 shadow-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <div className="grid grid-cols-[minmax(180px,1.4fr)_minmax(130px,1fr)_100px_100px] gap-4 border-b border-gray-100 bg-gray-50/80 px-5 py-3">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">School</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Location</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Students</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Status</span>
+          </div>
+          {schools.map((school) => (
+            <div key={school._id.toString()} className="grid grid-cols-[minmax(180px,1.4fr)_minmax(130px,1fr)_100px_100px] items-center gap-4 border-b border-gray-50 px-5 py-3.5 last:border-0 hover:bg-gray-50/60 transition">
+              <div>
+                <p className="text-xs font-bold text-gray-900">{school.name}</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">{school.coordinatorName || 'No coordinator assigned'}</p>
+              </div>
+              <span className="flex items-center gap-1.5 text-xs text-gray-600">
+                <MapPin className="h-3.5 w-3.5 text-gray-400" />{school.city}
+              </span>
+              <span className="text-xs font-bold text-gray-900">{school.totalStudents}</span>
+              <StatusChip variant={school.isActive ? 'success' : 'neutral'}>
+                {school.isActive ? 'Active' : 'Inactive'}
+              </StatusChip>
+            </div>
+          ))}
+          {!schools.length && (
+            <div className="p-6">
+              <EmptyState
+                icon="file"
+                title="No Schools Added"
+                description="Schools will appear here once they are registered on the platform."
+              />
+            </div>
+          )}
+        </div>
+      </GlassCard>
+    </div>
+  );
 }

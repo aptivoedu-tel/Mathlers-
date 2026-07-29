@@ -2,10 +2,12 @@ import { auth } from '@/lib/auth/auth';
 import { redirect } from 'next/navigation';
 import connectDB from '@/lib/db/mongodb';
 import PracticeSetModel, { IPracticeSet } from '@/models/PracticeSet';
-
 import GlassCard from '@/components/ui/GlassCard';
-
-import { BookOpen, Target, Clock, Filter } from 'lucide-react';
+import PageHeader from '@/components/ui/PageHeader';
+import StatusChip from '@/components/ui/StatusChip';
+import EmptyState from '@/components/ui/EmptyState';
+import PrimaryButton from '@/components/ui/PrimaryButton';
+import { BookOpen, Target, Clock, Filter, ArrowRight } from 'lucide-react';
 import SubjectModel from '@/models/Subject';
 import Link from 'next/link';
 
@@ -30,7 +32,7 @@ export default async function PracticePage({
 }) {
   const resolvedSearchParams = await searchParams;
   const session = await auth();
-  
+
   if (!session) {
     redirect('/sign-in');
   }
@@ -64,94 +66,102 @@ export default async function PracticePage({
   ]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Practice Arena</h1>
-        <p className="text-gray-600">Select a practice book to start improving your skills.</p>
-      </div>
+    <div className="space-y-6 animate-fade-in pb-12">
+      <PageHeader
+        title="Practice Arena"
+        subtitle="Select a practice book to start improving your problem-solving skills."
+        breadcrumbs={[
+          { label: 'Student', href: '/student/dashboard' },
+          { label: 'Practice Arena' }
+        ]}
+      />
 
-      <GlassCard className="p-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <h2 className="text-xl font-bold text-gray-900">Available Practice Books</h2>
-          
-          <div className="flex items-center gap-3">
-            <Filter className="w-4 h-4 text-gray-500" />
-            <span className="text-sm font-semibold text-gray-700">Filter:</span>
-            <div className="flex gap-2">
-              <Link href={`/student/practice?difficulty=${resolvedSearchParams.difficulty || ''}`}>
-                <span className={`text-sm px-3 py-1.5 rounded-lg border cursor-pointer ${!resolvedSearchParams.subject ? 'bg-brand-primary text-white border-brand-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}>
-                  All Subjects
+      <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card space-y-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-2 border-b border-gray-100">
+          <h2 className="text-base font-bold text-gray-900 tracking-tight">Available Practice Sets</h2>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1 mr-1">
+              <Filter className="w-3.5 h-3.5" /> Subject:
+            </span>
+            <Link href={`/student/practice?difficulty=${resolvedSearchParams.difficulty || ''}`}>
+              <span className={`text-xs px-3 py-1.5 rounded-full font-semibold transition cursor-pointer ${!resolvedSearchParams.subject ? 'bg-brand-primary text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200/70'}`}>
+                All
+              </span>
+            </Link>
+            {(subjects as ListItem[]).map((sub) => (
+              <Link key={sub._id.toString()} href={`/student/practice?subject=${sub._id}&difficulty=${resolvedSearchParams.difficulty || ''}`}>
+                <span className={`text-xs px-3 py-1.5 rounded-full font-semibold transition cursor-pointer ${resolvedSearchParams.subject === sub._id.toString() ? 'bg-brand-primary text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:bg-gray-200/70'}`}>
+                  {sub.name}
                 </span>
               </Link>
-              {(subjects as ListItem[]).map((sub) => (
-                <Link key={sub._id.toString()} href={`/student/practice?subject=${sub._id}&difficulty=${resolvedSearchParams.difficulty || ''}`}>
-                  <span className={`text-sm px-3 py-1.5 rounded-lg border cursor-pointer ${resolvedSearchParams.subject === sub._id.toString() ? 'bg-brand-primary text-white border-brand-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}>
-                    {sub.name}
-                  </span>
+            ))}
+          </div>
+        </div>
+
+        {practiceSets.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {(practiceSets as PracticeSetItem[]).map((set) => (
+              <GlassCard key={set._id.toString()} className="p-5 bg-white border border-gray-200/80 hover:border-brand-primary/40 transition-all flex flex-col h-full shadow-xs hover:shadow-card group">
+                <div className="flex justify-between items-start mb-3 gap-2">
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-sm group-hover:text-brand-primary transition-colors">{set.name}</h3>
+                    <p className="text-xs text-gray-500 line-clamp-2 mt-0.5">{set.description || 'No description provided.'}</p>
+                  </div>
+                  <StatusChip
+                    variant={
+                      set.difficulty === 'easy' ? 'success' :
+                      set.difficulty === 'medium' ? 'warning' :
+                      set.difficulty === 'hard' ? 'danger' : 'neutral'
+                    }
+                  >
+                    {set.difficulty || 'mixed'}
+                  </StatusChip>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {set.subject && (
+                    <span className="text-[11px] bg-brand-lighter/70 text-brand-primary font-semibold px-2.5 py-0.5 rounded-full">
+                      {set.subject.name}
+                    </span>
+                  )}
+                  {set.grade && (
+                    <span className="text-[11px] bg-blue-50 text-blue-600 font-semibold px-2.5 py-0.5 rounded-full">
+                      {set.grade.name}
+                    </span>
+                  )}
+                  {set.type && (
+                    <span className="text-[11px] bg-purple-50 text-purple-600 font-semibold px-2.5 py-0.5 rounded-full capitalize">
+                      {set.type.replace(/_/g, ' ')}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-4 text-xs text-gray-500 mb-5 mt-auto pt-3 border-t border-gray-100">
+                  <div className="flex items-center gap-1.5">
+                    <Target className="w-3.5 h-3.5 text-gray-400" />
+                    <span>{set.questions?.length || 0} Questions</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-gray-400" />
+                    <span>{Math.round((set.timeLimit || 1800) / 60)} min</span>
+                  </div>
+                </div>
+
+                <Link href={`/student/practice/${set._id}`}>
+                  <PrimaryButton size="sm" className="w-full justify-center gap-1.5">
+                    Start Practice <ArrowRight className="w-3.5 h-3.5" />
+                  </PrimaryButton>
                 </Link>
-              ))}
-            </div>
+              </GlassCard>
+            ))}
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {(practiceSets as PracticeSetItem[]).map((set) => (
-            <GlassCard key={set._id.toString()} className="p-6 hover:scale-105 transition-transform flex flex-col h-full">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-bold text-gray-900 mb-1">{set.name}</h3>
-                  <p className="text-sm text-gray-600 line-clamp-2">{set.description || 'No description provided.'}</p>
-                </div>
-                <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${
-                  set.difficulty === 'easy' ? 'bg-green-100 text-green-700' :
-                  set.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                  set.difficulty === 'hard' ? 'bg-red-100 text-red-700' :
-                  'bg-gray-100 text-gray-700'
-                }`}>
-                  {set.difficulty || 'mixed'}
-                </span>
-              </div>
-
-              <div className="flex gap-2 mb-4">
-                {set.subject && (
-                  <span className="text-xs bg-brand-lighter text-brand-primary px-2 py-1 rounded-full">
-                    {set.subject.name}
-                  </span>
-                )}
-                {set.grade && (
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                    {set.grade.name}
-                  </span>
-                )}
-                {set.type && (
-                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full capitalize">
-                    {set.type.replace(/_/g, ' ')}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-4 text-sm text-gray-600 mb-6 mt-auto">
-                <div className="flex items-center gap-1.5">
-                  <Target className="w-4 h-4 text-gray-400" />
-                  <span className="font-medium">{set.questions?.length || 0} Questions</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-gray-400" />
-                  <span className="font-medium">{Math.round((set.timeLimit || 1800) / 60)} min</span>
-                </div>
-              </div>
-
-              <a href={`/student/practice/${set._id}`} className="inline-flex w-full justify-center rounded-xl border border-transparent bg-brand-primary px-6 py-3 font-semibold text-white transition-colors hover:border-brand-dark hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2">Start Practice</a>
-            </GlassCard>
-          ))}
-        </div>
-
-        {practiceSets.length === 0 && (
-          <div className="text-center py-16 text-gray-500 border border-dashed border-gray-300 rounded-xl mt-4">
-            <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p className="text-lg font-medium text-gray-900 mb-1">No practice books found</p>
-            <p className="text-sm">Check back later or adjust your filters.</p>
-          </div>
+        ) : (
+          <EmptyState
+            icon="file"
+            title="No Practice Books Found"
+            description="No practice sets match your selected filters. Try choosing a different subject."
+          />
         )}
       </GlassCard>
     </div>

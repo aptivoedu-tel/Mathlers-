@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import connectDB from '@/lib/db/mongodb';
 import ResultModel from '@/models/Result';
 import GlassCard from '@/components/ui/GlassCard';
+import PageHeader from '@/components/ui/PageHeader';
 import { Award, Trophy, Star, Medal, Target, Zap, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -29,7 +30,7 @@ export default async function AchievementsPage() {
       icon: Star,
       condition: testsTaken > 0,
       color: 'text-yellow-500',
-      bgColor: 'bg-yellow-500/10'
+      bgColor: 'bg-yellow-50'
     },
     {
       id: 'point_collector',
@@ -38,7 +39,7 @@ export default async function AchievementsPage() {
       icon: Zap,
       condition: totalPoints >= 100,
       color: 'text-blue-500',
-      bgColor: 'bg-blue-500/10'
+      bgColor: 'bg-blue-50'
     },
     {
       id: 'math_wiz',
@@ -47,7 +48,7 @@ export default async function AchievementsPage() {
       icon: Trophy,
       condition: totalPoints >= 500,
       color: 'text-purple-500',
-      bgColor: 'bg-purple-500/10'
+      bgColor: 'bg-purple-50'
     },
     {
       id: 'accuracy_master',
@@ -56,7 +57,7 @@ export default async function AchievementsPage() {
       icon: Target,
       condition: results.some(r => r.accuracy === 100),
       color: 'text-red-500',
-      bgColor: 'bg-red-500/10'
+      bgColor: 'bg-red-50'
     },
     {
       id: 'dedicated_learner',
@@ -65,7 +66,7 @@ export default async function AchievementsPage() {
       icon: Medal,
       condition: totalAttempts >= 10,
       color: 'text-green-500',
-      bgColor: 'bg-green-500/10'
+      bgColor: 'bg-green-50'
     },
     {
       id: 'champion',
@@ -74,45 +75,51 @@ export default async function AchievementsPage() {
       icon: Award,
       condition: totalPoints >= 1000,
       color: 'text-brand-primary',
-      bgColor: 'bg-brand-lighter'
+      bgColor: 'bg-brand-lighter/60'
     }
   ];
 
   const unlockedCount = achievementsList.filter(a => a.condition).length;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Achievements</h1>
-        <p className="text-gray-600">Track your progress and unlock new badges.</p>
-      </div>
+    <div className="max-w-6xl mx-auto space-y-6 animate-fade-in pb-12">
+      <PageHeader
+        title="Achievements"
+        subtitle="Track your progress and unlock new badges as you improve."
+        breadcrumbs={[
+          { label: 'Student', href: '/student/dashboard' },
+          { label: 'Achievements' }
+        ]}
+      />
 
-      <GlassCard className="p-8 bg-gradient-to-br from-brand-primary to-brand-dark text-white">
+      {/* Progress Summary Card */}
+      <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card">
         <div className="flex flex-col md:flex-row items-center gap-6 justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-2">Your Progress</h2>
-            <p className="text-white/80">
-              You have unlocked {unlockedCount} out of {achievementsList.length} achievements!
+            <h2 className="text-base font-bold text-gray-900 tracking-tight">Your Progress</h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              You have unlocked <span className="font-bold text-brand-primary">{unlockedCount}</span> out of {achievementsList.length} achievements.
             </p>
           </div>
           <div className="flex gap-8">
             <div className="text-center">
-              <p className="text-3xl font-bold">{totalPoints}</p>
-              <p className="text-sm text-white/80 uppercase tracking-wider">Total Points</p>
+              <p className="text-2xl font-bold text-gray-900">{totalPoints}</p>
+              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Total Points</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold">{testsTaken}</p>
-              <p className="text-sm text-white/80 uppercase tracking-wider">Tests Taken</p>
+              <p className="text-2xl font-bold text-gray-900">{testsTaken}</p>
+              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Tests Taken</p>
             </div>
             <div className="text-center hidden sm:block">
-              <p className="text-3xl font-bold">{competitionAttempts}</p>
-              <p className="text-sm text-white/80 uppercase tracking-wider">Competitions</p>
+              <p className="text-2xl font-bold text-gray-900">{competitionAttempts}</p>
+              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Competitions</p>
             </div>
           </div>
         </div>
       </GlassCard>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Achievement Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {achievementsList.map((achievement) => {
           const Icon = achievement.icon;
           const isUnlocked = achievement.condition;
@@ -121,39 +128,39 @@ export default async function AchievementsPage() {
             <GlassCard 
               key={achievement.id} 
               className={cn(
-                "p-6 transition-all duration-300 relative overflow-hidden",
-                !isUnlocked && "opacity-75 grayscale-[0.5]"
+                "p-5 transition-all duration-300 relative overflow-hidden bg-white border border-gray-200/80 shadow-xs hover:shadow-card",
+                !isUnlocked && "opacity-60 grayscale-[0.3]"
               )}
             >
               {!isUnlocked && (
                 <div className="absolute top-4 right-4">
-                  <Lock className="w-5 h-5 text-gray-400" />
+                  <Lock className="w-4 h-4 text-gray-300" />
                 </div>
               )}
               
               <div className={cn(
-                "w-14 h-14 rounded-2xl flex items-center justify-center mb-4",
+                "w-11 h-11 rounded-xl flex items-center justify-center mb-3",
                 isUnlocked ? achievement.bgColor : "bg-gray-100"
               )}>
                 <Icon className={cn(
-                  "w-7 h-7", 
+                  "w-5 h-5", 
                   isUnlocked ? achievement.color : "text-gray-400"
                 )} />
               </div>
               
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-sm font-bold text-gray-900 mb-1">
                 {achievement.title}
               </h3>
-              <p className="text-gray-600 text-sm">
+              <p className="text-xs text-gray-500 leading-relaxed">
                 {achievement.description}
               </p>
               
-              <div className="mt-4 pt-4 border-t">
+              <div className="mt-3 pt-3 border-t border-gray-100">
                 <span className={cn(
-                  "text-xs font-semibold uppercase tracking-wider",
-                  isUnlocked ? "text-green-600" : "text-gray-500"
+                  "text-[10px] font-bold uppercase tracking-wider",
+                  isUnlocked ? "text-emerald-600" : "text-gray-400"
                 )}>
-                  {isUnlocked ? 'Unlocked' : 'Locked'}
+                  {isUnlocked ? '✓ Unlocked' : '🔒 Locked'}
                 </span>
               </div>
             </GlassCard>

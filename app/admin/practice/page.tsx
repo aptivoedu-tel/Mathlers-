@@ -5,6 +5,7 @@ import { BookOpen, Eye, FilePlus2, Filter, Plus, Trash2 } from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
 import Modal from '@/components/ui/Modal';
 import PrimaryButton from '@/components/ui/PrimaryButton';
+import PageHeader from '@/components/ui/PageHeader';
 
 type Lookup = { _id: string; name: string };
 type Topic = { _id: string; name: string; subtopics?: { _id: string; name: string }[] };
@@ -146,17 +147,35 @@ export default function AdminPracticePage() {
 
   const totalSelected = form.sections.reduce((a, s) => a + s.questions.length, 0);
 
-  return <div className="mx-auto max-w-7xl space-y-6">
-    <div className="flex flex-col gap-4 border-b border-gray-200 pb-7 sm:flex-row sm:items-end sm:justify-between">
-      <div><p className="text-sm font-semibold uppercase tracking-wide text-brand-primary">Practice operations</p><h1 className="mt-1 text-3xl font-bold text-gray-950">Practice books</h1><p className="mt-2 text-gray-600">Build practice sets from any mix of questions across subjects, topics, and grades.</p></div>
-      <PrimaryButton onClick={() => setOpen(true)}><Plus className="mr-2 h-4 w-4" />Create book</PrimaryButton>
-    </div>
+  return <div className="mx-auto max-w-7xl space-y-6 animate-fade-in pb-12">
+    <PageHeader
+      title="Practice Books"
+      subtitle="Build practice sets from any mix of questions across subjects, topics, and grades."
+      breadcrumbs={[
+        { label: 'Admin', href: '/admin/dashboard' },
+        { label: 'Practice Books' }
+      ]}
+      actions={
+        <PrimaryButton size="sm" onClick={() => setOpen(true)}>
+          <Plus className="mr-1.5 h-3.5 w-3.5" />
+          Create Book
+        </PrimaryButton>
+      }
+    />
 
     {notice && <div className="flex items-center justify-between rounded-lg border border-brand-primary/20 bg-brand-lighter/40 px-4 py-3 text-sm text-gray-800"><span>{notice}</span><button onClick={() => setNotice('')} className="font-semibold text-brand-primary">Dismiss</button></div>}
 
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {books.map(book => <GlassCard key={book._id} className="flex min-h-64 flex-col p-5">
-        <div className="flex items-start justify-between gap-3"><div><h2 className="font-bold text-gray-950">{book.name}</h2><p className="mt-1 text-sm text-gray-600">{book.description || 'No description'}</p></div><span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${book.isPublished ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>{book.isPublished ? 'Published' : 'Draft'}</span></div>
+      {books.map(book => <GlassCard key={book._id} className="flex min-h-64 flex-col p-5 bg-white border border-gray-200/90 shadow-card">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="font-bold text-gray-900">{book.name}</h2>
+            <p className="mt-1 text-xs text-gray-500 line-clamp-2">{book.description || 'No description provided'}</p>
+          </div>
+          <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${book.isPublished ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-gray-100 text-gray-600'}`}>
+            {book.isPublished ? 'Published' : 'Draft'}
+          </span>
+        </div>
         <div className="mt-5 grid grid-cols-3 gap-2 text-center text-xs text-gray-600"><div><strong className="block text-base text-gray-950">{book.sections?.length || 0}</strong>Sections</div><div><strong className="block text-base text-gray-950">{book.questions?.length || 0}</strong>Questions</div><div><strong className="block text-base text-gray-950">{Math.round(book.timeLimit / 60)}</strong>Minutes</div></div>
         <div className="mt-auto flex gap-2 pt-5"><button onClick={() => void setPublished(book)} className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{book.isPublished ? 'Unpublish' : 'Publish'}</button><button onClick={() => void removeBook(book)} className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-red-600 hover:bg-red-50" aria-label={`Delete ${book.name}`}><Trash2 className="h-4 w-4" /></button></div>
       </GlassCard>)}

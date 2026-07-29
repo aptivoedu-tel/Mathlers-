@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { FileX, Search, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {
   icon?: 'search' | 'file' | 'alert' | 'custom';
@@ -12,6 +13,7 @@ interface EmptyStateProps {
     label: string;
     onClick: () => void;
   };
+  className?: string;
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
@@ -20,26 +22,27 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   title,
   description,
   action,
+  className,
 }) => {
   const icons: Record<string, React.ReactNode> = {
-    search: <Search className="w-16 h-16 text-gray-300" />,
-    file: <FileX className="w-16 h-16 text-gray-300" />,
-    alert: <AlertCircle className="w-16 h-16 text-gray-300" />,
+    search: <Search className="w-12 h-12 text-gray-300" />,
+    file: <FileX className="w-12 h-12 text-gray-300" />,
+    alert: <AlertCircle className="w-12 h-12 text-gray-300" />,
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4">
-      <div className="mb-4">
+    <div className={cn("flex flex-col items-center justify-center py-16 px-4", className)}>
+      <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-5">
         {customIcon || (icon !== 'custom' && icons[icon])}
       </div>
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">{title}</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-1.5">{title}</h3>
       {description && (
-        <p className="text-gray-600 text-center mb-6 max-w-md">{description}</p>
+        <p className="text-sm text-gray-500 text-center mb-6 max-w-sm">{description}</p>
       )}
       {action && (
         <button
           onClick={action.onClick}
-          className="glass-button px-6 py-3 text-white font-semibold rounded-xl"
+          className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white bg-brand-primary rounded-xl shadow-sm hover:bg-brand-dark hover:shadow-md transition-all duration-150"
         >
           {action.label}
         </button>

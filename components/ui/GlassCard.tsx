@@ -15,17 +15,17 @@ export default function GlassCard({
   hover = false 
 }: GlassCardProps) {
   const variantStyles = {
-    light: 'bg-glass-light backdrop-blur-md',
-    medium: 'bg-glass-medium backdrop-blur-lg',
-    dark: 'bg-glass-dark backdrop-blur-xl',
+    light: 'bg-white border-gray-200/80',
+    medium: 'bg-gray-50 border-gray-200/60',
+    dark: 'bg-gray-100/80 border-gray-200/40',
   };
 
   return (
     <div
       className={cn(
-        'rounded-2xl border border-white/20 shadow-lg',
+        'rounded-2xl border shadow-card transition-all duration-200',
         variantStyles[variant],
-        hover && 'hover:shadow-xl hover:scale-[1.02] transition-all duration-300',
+        hover && 'hover:shadow-card-hover hover:-translate-y-0.5 cursor-pointer',
         className
       )}
     >

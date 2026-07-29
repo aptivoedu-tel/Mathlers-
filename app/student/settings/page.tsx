@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth/auth';
 import { redirect } from 'next/navigation';
+import PageHeader from '@/components/ui/PageHeader';
 import SettingsClient from './SettingsClient';
 
 export default async function SettingsPage() {
@@ -10,11 +11,15 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-        <p className="text-gray-600">Manage your account preferences and settings.</p>
-      </div>
+    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-12">
+      <PageHeader
+        title="Settings"
+        subtitle="Manage your account preferences, notifications, and security."
+        breadcrumbs={[
+          { label: 'Student', href: '/student/dashboard' },
+          { label: 'Settings' }
+        ]}
+      />
 
       <SettingsClient user={session.user} />
     </div>

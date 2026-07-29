@@ -1,8 +1,15 @@
 import NextAuthProvider from '@/components/auth/NextAuthProvider';
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from '@/components/theme/ThemeProvider';
 import { getSiteTheme } from '@/lib/theme/siteTheme';
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "Mathlers",
@@ -17,8 +24,8 @@ export default async function RootLayout({
   const theme = await getSiteTheme();
 
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+    <html lang="en" className={`h-full antialiased ${inter.variable}`}>
+      <body className={`min-h-full flex flex-col ${inter.className}`}>
         <NextAuthProvider>
           <ThemeProvider initialTheme={theme}>{children}</ThemeProvider>
         </NextAuthProvider>

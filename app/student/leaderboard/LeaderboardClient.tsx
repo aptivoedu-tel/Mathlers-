@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import GlassCard from '@/components/ui/GlassCard';
+import PageHeader from '@/components/ui/PageHeader';
 import { Trophy, Medal, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -38,21 +39,25 @@ export default function LeaderboardClient({
   const currentRank = activeTab === 'national' ? userNationalRank : userSchoolRank;
   
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Leaderboard</h1>
-        <p className="text-gray-600">See how you rank against other Mathlers.</p>
-      </div>
+    <div className="max-w-6xl mx-auto space-y-6 animate-fade-in pb-12">
+      <PageHeader
+        title="Leaderboard"
+        subtitle="See how you rank against other Mathlers students nationwide."
+        breadcrumbs={[
+          { label: 'Student', href: '/student/dashboard' },
+          { label: 'Leaderboard' }
+        ]}
+      />
       
       {/* Tabs */}
-      <div className="flex p-1 bg-gray-100 rounded-xl w-fit">
+      <div className="flex gap-2">
         <button
           onClick={() => setActiveTab('national')}
           className={cn(
-            "px-6 py-2 rounded-lg font-semibold text-sm transition-all",
+            "px-3.5 py-2 rounded-xl font-semibold text-xs transition-all",
             activeTab === 'national' 
-              ? "bg-white text-brand-primary shadow-sm" 
-              : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+              ? "bg-brand-primary text-white shadow-xs" 
+              : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
           )}
         >
           National
@@ -60,23 +65,23 @@ export default function LeaderboardClient({
         <button
           onClick={() => setActiveTab('school')}
           className={cn(
-            "px-6 py-2 rounded-lg font-semibold text-sm transition-all",
+            "px-3.5 py-2 rounded-xl font-semibold text-xs transition-all",
             activeTab === 'school' 
-              ? "bg-white text-brand-primary shadow-sm" 
-              : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+              ? "bg-brand-primary text-white shadow-xs" 
+              : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
           )}
         >
           My School
         </button>
       </div>
 
-      <GlassCard className="p-8 bg-gradient-to-br from-brand-primary to-brand-dark text-white">
+      <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card">
         <div className="flex flex-col md:flex-row items-center gap-6 justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-2">
+            <h2 className="text-base font-bold text-gray-900 tracking-tight">
               {activeTab === 'national' ? 'Your National Rank' : 'Your School Rank'}
             </h2>
-            <p className="text-white/80">
+            <p className="text-xs text-gray-500 mt-0.5">
               {activeTab === 'school' && !hasSchool 
                 ? "You are not associated with any school." 
                 : "Keep practicing to improve your ranking!"}
@@ -84,25 +89,25 @@ export default function LeaderboardClient({
           </div>
           <div className="flex gap-8">
             <div className="text-center">
-              <p className="text-5xl font-bold">
+              <p className="text-3xl font-bold text-brand-primary">
                 {activeTab === 'school' && !hasSchool ? '-' : `#${currentRank || '-'}`}
               </p>
-              <p className="text-sm text-white/80 uppercase tracking-wider mt-2">
+              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mt-1">
                 {activeTab === 'national' ? 'National Rank' : 'School Rank'}
               </p>
             </div>
             {currentUser && (
               <div className="text-center hidden sm:block">
-                <p className="text-5xl font-bold">{currentUser.points || 0}</p>
-                <p className="text-sm text-white/80 uppercase tracking-wider mt-2">Total Points</p>
+                <p className="text-3xl font-bold text-gray-900">{currentUser.points || 0}</p>
+                <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mt-1">Total Points</p>
               </div>
             )}
           </div>
         </div>
       </GlassCard>
 
-      <GlassCard className="p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">
+      <GlassCard className="p-6 bg-white border border-gray-200/90 shadow-card space-y-4">
+        <h2 className="text-base font-bold text-gray-900 tracking-tight">
           {activeTab === 'national' ? 'Top National Performers' : 'Top School Performers'}
         </h2>
         
