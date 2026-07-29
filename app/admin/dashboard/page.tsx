@@ -8,6 +8,7 @@ import ResultModel from '@/models/Result';
 import GlassCard from '@/components/ui/GlassCard';
 import StatCard from '@/components/ui/StatCard';
 import PrimaryButton from '@/components/ui/PrimaryButton';
+import Link from 'next/link';
 import { Users, Trophy, Target, Award, TrendingUp, Activity } from 'lucide-react';
 
 export default async function AdminDashboard() {
@@ -98,26 +99,26 @@ export default async function AdminDashboard() {
             <h2 className="text-xl font-bold text-gray-900">Quick Actions</h2>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-brand-lighter rounded-xl hover:scale-105 transition-transform cursor-pointer">
+            <Link href="/admin/questions" className="p-4 bg-brand-lighter rounded-xl hover:scale-105 transition-transform">
               <Target className="w-8 h-8 text-brand-primary mb-2" />
               <p className="font-semibold text-gray-900">Add Question</p>
               <p className="text-sm text-gray-600">Create new question</p>
-            </div>
-            <div className="p-4 bg-brand-lighter rounded-xl hover:scale-105 transition-transform cursor-pointer">
+            </Link>
+            <Link href="/admin/competitions/create" className="p-4 bg-brand-lighter rounded-xl hover:scale-105 transition-transform">
               <Trophy className="w-8 h-8 text-brand-primary mb-2" />
               <p className="font-semibold text-gray-900">Create Competition</p>
               <p className="text-sm text-gray-600">Start new event</p>
-            </div>
-            <div className="p-4 bg-brand-lighter rounded-xl hover:scale-105 transition-transform cursor-pointer">
+            </Link>
+            <Link href="/admin/students" className="p-4 bg-brand-lighter rounded-xl hover:scale-105 transition-transform">
               <Users className="w-8 h-8 text-brand-primary mb-2" />
               <p className="font-semibold text-gray-900">Manage Students</p>
               <p className="text-sm text-gray-600">View all students</p>
-            </div>
-            <div className="p-4 bg-brand-lighter rounded-xl hover:scale-105 transition-transform cursor-pointer">
+            </Link>
+            <Link href="/admin/analytics" className="p-4 bg-brand-lighter rounded-xl hover:scale-105 transition-transform">
               <TrendingUp className="w-8 h-8 text-brand-primary mb-2" />
               <p className="font-semibold text-gray-900">View Analytics</p>
               <p className="text-sm text-gray-600">Platform insights</p>
-            </div>
+            </Link>
           </div>
         </GlassCard>
       </div>

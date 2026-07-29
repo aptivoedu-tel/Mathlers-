@@ -48,6 +48,10 @@ const config: Config = {
           "100%": { transform: "scale(1)", opacity: "1" },
         },
       },
+      spacing: {
+        '68': '17rem',  // sidebar expanded (w-64 = 16rem + 1rem gap)
+        '20': '5rem',   // sidebar collapsed (w-16 = 4rem + 1rem gap)
+      },
     },
   },
   plugins: [],
