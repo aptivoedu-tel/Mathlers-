@@ -2,6 +2,7 @@ import { NextAuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import connectDB from "@/lib/db/mongodb";
 import UserModel, { UserRole } from "@/models/User";
+import SchoolModel from "@/models/School";
 import bcrypt from "bcryptjs";
 
 export type MathlersSession = {
@@ -13,32 +14,85 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email or Username", type: "text" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email and password are required");
+          throw new Error("Email/Username and password are required");
         }
         await connectDB();
+        const input = credentials.email.trim().toLowerCase();
+
+        // 1. Try finding in UserModel
         const user = await UserModel.findOne({
-          email: credentials.email.toLowerCase()
+          $or: [{ email: input }, { playerId: input }]
         }).select("+password");
 
-        if (!user) throw new Error("No account found with that email");
-        if (!user.isActive) throw new Error("Account is inactive");
-        if (user.isSuspended) throw new Error("Account is suspended");
+        if (user) {
+          // Check if associated school is status-restricted
+          if (user.school) {
+            const school = await SchoolModel.findById(user.school);
+            if (school) {
+              if (school.status === "Pending") {
+                throw new Error("Your school registration request is currently pending approval.");
+              }
+              if (school.status === "Rejected") {
+                throw new Error("Your school registration request was not approved.");
+              }
+              if (school.status === "Blocked") {
+                throw new Error("This school account has been blocked.");
+              }
+            }
+          }
 
-        const isValid = await bcrypt.compare(credentials.password, user.password || "");
-        if (!isValid) throw new Error("Incorrect password");
+          if (!user.isActive) throw new Error("Account is inactive");
+          if (user.isSuspended) throw new Error("Account is suspended");
 
-        return {
-          id: user._id.toString(),
-          email: user.email,
-          name: user.fullName,
-          role: user.role,
-          playerId: user.playerId,
-        };
+          const isValid = await bcrypt.compare(credentials.password, user.password || "");
+          if (!isValid) throw new Error("Incorrect password");
+
+          return {
+            id: user._id.toString(),
+            email: user.email,
+            name: user.fullName,
+            role: user.role,
+            playerId: user.playerId,
+          };
+        }
+
+        // 2. Try finding direct School account
+        const school = await SchoolModel.findOne({
+          $or: [{ email: input }, { username: input }]
+        }).select("+password");
+
+        if (school) {
+          if (school.status === "Pending") {
+            throw new Error("Your school registration request is currently pending approval.");
+          }
+          if (school.status === "Rejected") {
+            throw new Error("Your school registration request was not approved.");
+          }
+          if (school.status === "Blocked") {
+            throw new Error("This school account has been blocked.");
+          }
+          if (school.status !== "Approved") {
+            throw new Error("Your school account is not authorized to sign in.");
+          }
+
+          const isValid = await bcrypt.compare(credentials.password, school.password || "");
+          if (!isValid) throw new Error("Incorrect password");
+
+          return {
+            id: school._id.toString(),
+            email: school.email || `${school.username}@school.mathlers.com`,
+            name: school.name,
+            role: UserRole.ADMIN,
+            playerId: school.username || school.name,
+          };
+        }
+
+        throw new Error("No account found with that email or username.");
       }
     })
   ],

@@ -4,9 +4,9 @@ import connectDB from '@/lib/db/mongodb';
 import UserModel, { UserRole } from '@/models/User';
 import SchoolModel from '@/models/School';
 import PageHeader from '@/components/ui/PageHeader';
-import SchoolStudentsClient from './SchoolStudentsClient';
+import SchoolTeachersClient from './SchoolTeachersClient';
 
-export default async function SchoolStudentsPage() {
+export default async function SchoolTeachersPage() {
   const session = await auth();
   if (!session) redirect('/sign-in');
 
@@ -22,33 +22,31 @@ export default async function SchoolStudentsPage() {
     return <div>School not found</div>;
   }
 
-  const rawStudents = await UserModel.find({
+  const rawTeachers = await UserModel.find({
     school: school._id,
-    role: UserRole.STUDENT,
+    role: UserRole.TEACHER,
     isActive: true,
   }).sort({ createdAt: -1 }).lean();
 
-  const serializedStudents = rawStudents.map((s: any) => ({
-    _id: s._id.toString(),
-    fullName: s.fullName,
-    playerId: s.playerId, // Roll Number equivalent
-    email: s.email,
-    grade: s.grade || 'N/A',
-    points: s.points || 0,
-    isActive: s.isActive,
+  const serializedTeachers = rawTeachers.map((t: any) => ({
+    _id: t._id.toString(),
+    fullName: t.fullName,
+    playerId: t.playerId,
+    email: t.email,
+    isActive: t.isActive,
   }));
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 animate-fade-in pb-12">
       <PageHeader
-        title="Student Management"
-        subtitle="View, add, and manage your school's students."
+        title="Teacher Management"
+        subtitle="View, add, and manage your school's teachers."
         breadcrumbs={[
           { label: 'School Portal', href: '/school/dashboard' },
-          { label: 'Students' },
+          { label: 'Teachers' },
         ]}
       />
-      <SchoolStudentsClient initialStudents={serializedStudents} domain={school.domain || ''} />
+      <SchoolTeachersClient initialTeachers={serializedTeachers} domain={school.domain || ''} />
     </div>
   );
 }

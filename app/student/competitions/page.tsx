@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import connectDB from '@/lib/db/mongodb';
 import CompetitionModel, { CompetitionStatus } from '@/models/Competition';
 import EnrollmentModel from '@/models/Enrollment';
+import UserModel from '@/models/User';
+import SchoolModel from '@/models/School';
 import StudentCompetitionCenter, { CompetitionCard, EnrollmentSummary } from './StudentCompetitionCenter';
 import { isValidObjectId } from '@/lib/utils/isValidObjectId';
 
@@ -38,11 +40,26 @@ export default async function CompetitionsPage() {
     CompetitionStatus.PAUSED,
     CompetitionStatus.COMPLETED,
   ];
+
+  const user = hasValidId ? await UserModel.findById(session.user.id).select('school') : null;
+  let school = null;
+  if (user?.school) {
+    school = await SchoolModel.findById(user.school).select('assignedCompetitions');
+  }
+
+  const queryOr: any[] = [];
+  if (school && school.assignedCompetitions) {
+    queryOr.push({ _id: { $in: school.assignedCompetitions } });
+  } else {
+    queryOr.push({ status: { $in: publicStatuses } });
+  }
+
+  if (enrolledCompIds.length) {
+    queryOr.push({ _id: { $in: enrolledCompIds } });
+  }
+
   const rawCompetitions = await CompetitionModel.find({
-    $or: [
-      { status: { $in: publicStatuses } },
-      ...(enrolledCompIds.length ? [{ _id: { $in: enrolledCompIds } }] : []),
-    ],
+    $or: queryOr,
   }).sort({ 'schedule.competitionStartDate': 1 });
 
   const competitions = JSON.parse(JSON.stringify(rawCompetitions)) as CompetitionCard[];

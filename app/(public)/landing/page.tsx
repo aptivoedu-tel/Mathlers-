@@ -42,7 +42,15 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="contact" className="bg-gray-50 px-6 py-20 text-center"><div className="mx-auto max-w-2xl"><h2 className="text-3xl font-bold text-gray-950">Need access for your school?</h2><p className="mt-3 text-gray-600">Contact Mathlers to set up your organization workspace.</p><a href="mailto:info@mathlers.com?subject=Mathlers%20organization%20access%20request" className="mt-6 inline-flex rounded-xl border border-transparent bg-brand-primary px-5 py-3 font-semibold text-white transition-colors hover:border-brand-dark hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2">Email Mathlers support</a></div></section>
+        <section id="contact" className="bg-gray-50 px-6 py-20 text-center">
+          <div className="mx-auto max-w-2xl">
+            <h2 className="text-3xl font-bold text-gray-950">Need access for your school?</h2>
+            <p className="mt-3 text-gray-600">Submit a registration request to get your school organization workspace.</p>
+            <Link href="/request-access" className="mt-6 inline-flex rounded-xl border border-transparent bg-brand-primary px-6 py-3 font-semibold text-white transition-colors hover:border-brand-dark hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2">
+              Request School Registration
+            </Link>
+          </div>
+        </section>
       </main>
     </PublicLayout>
   );

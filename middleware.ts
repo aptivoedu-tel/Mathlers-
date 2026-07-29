@@ -26,8 +26,17 @@ export default async function middleware(request: NextRequest) {
   }
 
   const origin = request.headers.get('origin');
-  if (origin && origin !== request.nextUrl.origin) {
-    return NextResponse.json({ error: 'Cross-site requests are not allowed.' }, { status: 403 });
+  if (origin) {
+    try {
+      const originHost = new URL(origin).host;
+      const requestHost = request.headers.get('host') || request.nextUrl.host;
+      const normalizeHost = (h: string) => h.replace('127.0.0.1', 'localhost');
+      if (normalizeHost(originHost) !== normalizeHost(requestHost)) {
+        return NextResponse.json({ error: 'Cross-site requests are not allowed.' }, { status: 403 });
+      }
+    } catch {
+      return NextResponse.json({ error: 'Invalid origin header.' }, { status: 403 });
+    }
   }
 
   const rule = sensitiveApiLimit(request.nextUrl.pathname);

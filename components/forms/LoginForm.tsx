@@ -21,19 +21,26 @@ export default function LoginForm() {
     setLoading(true);
     setError("");
 
-    const res = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
 
-    setLoading(false);
+      setLoading(false);
 
-    if (res?.error) {
-      setError(res.error === "CredentialsSignin" ? "Invalid email or password." : res.error);
-    } else {
-      router.push(callbackUrl);
-      router.refresh();
+      if (res?.error) {
+        setError(res.error === "CredentialsSignin" ? "Invalid email or password." : res.error);
+      } else if (res?.ok) {
+        router.push(callbackUrl);
+        router.refresh();
+      } else {
+        setError("An unexpected error occurred during sign in.");
+      }
+    } catch (err: any) {
+      setLoading(false);
+      setError(err?.message || "Failed to sign in. Please try again.");
     }
   };
 
@@ -55,13 +62,13 @@ export default function LoginForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label="Email address"
-          type="email"
+          label="Email address or Username"
+          type="text"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          autoComplete="email"
-          placeholder="you@mathlers.com"
+          autoComplete="username"
+          placeholder="email@domain.com or username"
         />
 
         <Input

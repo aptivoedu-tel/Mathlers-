@@ -71,6 +71,9 @@ export default async function PlayerCardPage() {
             <div>
               <h2 className="text-lg font-bold text-gray-900 tracking-tight">{user?.fullName}</h2>
               <p className="text-xs text-gray-500 mt-0.5 font-mono">ID: {user?.playerId}</p>
+              {user?.schoolName && (
+                <p className="text-xs text-brand-primary font-semibold mt-0.5">🏫 {user.schoolName}</p>
+              )}
               <div className="flex items-center gap-1.5 mt-1.5">
                 <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                 <span className="text-xs font-bold text-gray-700">Level {level}</span>

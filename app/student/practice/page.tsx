@@ -2,6 +2,8 @@ import { auth } from '@/lib/auth/auth';
 import { redirect } from 'next/navigation';
 import connectDB from '@/lib/db/mongodb';
 import PracticeSetModel, { IPracticeSet } from '@/models/PracticeSet';
+import UserModel from '@/models/User';
+import SchoolModel from '@/models/School';
 import GlassCard from '@/components/ui/GlassCard';
 import PageHeader from '@/components/ui/PageHeader';
 import StatusChip from '@/components/ui/StatusChip';
@@ -41,15 +43,40 @@ export default async function PracticePage({
 
   const now = new Date();
 
+  const user = await UserModel.findById(session.user.id).select('school');
+  let school = null;
+  if (user?.school) {
+    school = await SchoolModel.findById(user.school).select('assignedPracticeSets');
+  }
+
+  const queryOr: any[] = [];
+  if (school && school.assignedPracticeSets) {
+    queryOr.push({ _id: { $in: school.assignedPracticeSets } });
+  } else {
+    // Note: If no school, we fallback to showing all published practice sets
+    // Since PracticeSets don't have a status, we assume isPublished: true is enough.
+    // The query object structure dictates we don't necessarily need a fallback OR here, 
+    // but we can add an empty object to represent "match all" for the $or.
+    queryOr.push({});
+  }
+
   const [practiceSets, subjects] = await Promise.all([
     PracticeSetModel.find({
       isPublished: true,
-      $or: [
-        { 'availability.startDate': { $exists: false } },
-        { 'availability.startDate': { $lte: now } },
-      ],
+      $or: queryOr,
       $and: [
-        { $or: [{ 'availability.endDate': { $exists: false } }, { 'availability.endDate': { $gte: now } }] },
+        {
+          $or: [
+            { 'availability.startDate': { $exists: false } },
+            { 'availability.startDate': { $lte: now } },
+          ],
+        },
+        {
+          $or: [
+            { 'availability.endDate': { $exists: false } },
+            { 'availability.endDate': { $gte: now } },
+          ],
+        },
       ],
       ...(resolvedSearchParams.subject ? { subject: resolvedSearchParams.subject } : {}),
       ...(resolvedSearchParams.difficulty && resolvedSearchParams.difficulty !== 'all'
