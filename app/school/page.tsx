@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth/auth';
 import connectDB from '@/lib/db/mongodb';
 import SchoolModel from '@/models/School';
 import UserModel, { UserRole } from '@/models/User';
-import CompetitionModel from '@/models/Competition';
+import CompetitionModel, { CompetitionStatus } from '@/models/Competition';
 import NotificationModel from '@/models/Notification';
 import GlassCard from '@/components/ui/GlassCard';
 import StatCard from '@/components/ui/StatCard';
@@ -44,8 +44,8 @@ export default async function SchoolDashboard() {
   ] = await Promise.all([
     UserModel.countDocuments({ school: school._id, role: UserRole.STUDENT, isActive: true }),
     UserModel.countDocuments({ school: school._id, role: UserRole.TEACHER, isActive: true }),
-    CompetitionModel.countDocuments({ status: { $in: ['Upcoming', 'Active'] } }),
-    CompetitionModel.countDocuments({ status: 'Completed' }),
+    CompetitionModel.countDocuments({ status: { $in: [CompetitionStatus.REGISTRATION_OPEN, CompetitionStatus.REGISTRATION_CLOSED, CompetitionStatus.IN_PROGRESS] } }),
+    CompetitionModel.countDocuments({ status: CompetitionStatus.COMPLETED }),
     UserModel.countDocuments({ school: school._id, role: UserRole.STUDENT, competitionsJoined: { $gt: 0 } }),
     UserModel.aggregate([
       { $match: { school: school._id, role: UserRole.STUDENT, isActive: true } },
@@ -115,7 +115,7 @@ export default async function SchoolDashboard() {
               recentNotifications.map(notification => (
                 <div key={notification._id.toString()} className="p-3 bg-gray-50 rounded-xl border border-gray-100">
                   <h4 className="text-sm font-bold text-gray-800">{notification.title}</h4>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">{notification.content}</p>
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">{notification.message}</p>
                 </div>
               ))
             ) : (

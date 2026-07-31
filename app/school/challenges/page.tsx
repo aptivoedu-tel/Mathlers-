@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth/auth';
 import connectDB from '@/lib/db/mongodb';
 import UserModel from '@/models/User';
 import SchoolModel from '@/models/School';
-import CompetitionModel from '@/models/Competition';
+import CompetitionModel, { CompetitionStatus } from '@/models/Competition';
 import PageHeader from '@/components/ui/PageHeader';
 import SchoolChallengesClient from './SchoolChallengesClient';
 
@@ -29,7 +29,7 @@ export default async function SchoolChallengesPage() {
 
   // Fetch all active/upcoming competitions that schools can assign
   const rawCompetitions = await CompetitionModel.find({
-    status: { $in: ['registration_open', 'registration_closed', 'in_progress', 'upcoming'] }
+    status: { $in: [CompetitionStatus.REGISTRATION_OPEN, CompetitionStatus.REGISTRATION_CLOSED, CompetitionStatus.IN_PROGRESS] }
   }).sort({ 'schedule.competitionStartDate': 1 }).lean();
 
   const serializedCompetitions = rawCompetitions.map((c: any) => ({

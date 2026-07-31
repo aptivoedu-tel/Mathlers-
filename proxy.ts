@@ -18,7 +18,7 @@ function clientAddress(request: Request) {
     || 'unknown';
 }
 
-export default async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   if (!request.nextUrl.pathname.startsWith('/api/') || !mutatingMethods.has(request.method)) {
     const res = NextResponse.next();
     res.headers.set('Content-Security-Policy', "base-uri 'self'; object-src 'none'; frame-ancestors 'none';");

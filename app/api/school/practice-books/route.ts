@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     let schoolId = session.user.id;
     const user = await UserModel.findById(session.user.id).select('school');
     if (user?.school) {
-      schoolId = user.school;
+      schoolId = user.school.toString();
     } else {
       const schoolDoc = await SchoolModel.findOne({
         $or: [{ email: session.user.email }, { username: session.user.playerId }],
