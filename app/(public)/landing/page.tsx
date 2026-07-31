@@ -111,25 +111,6 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            {/* Highlight Banner */}
-            <div className="mt-16 grid grid-cols-2 gap-4 rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xs sm:grid-cols-4">
-              <div className="text-center p-2">
-                <p className="text-2xl font-bold text-gray-900 font-sail">300+</p>
-                <p className="mt-1 text-xs font-semibold text-gray-500">Practice Chapters</p>
-              </div>
-              <div className="text-center p-2 border-l border-gray-100">
-                <p className="text-2xl font-bold text-gray-900 font-sail">Dual Rank</p>
-                <p className="mt-1 text-xs font-semibold text-gray-500">National & School</p>
-              </div>
-              <div className="text-center p-2 border-l border-gray-100">
-                <p className="text-2xl font-bold text-gray-900 font-sail">Real-Time</p>
-                <p className="mt-1 text-xs font-semibold text-gray-500">Competition Engine</p>
-              </div>
-              <div className="text-center p-2 border-l border-gray-100">
-                <p className="text-2xl font-bold text-gray-900 font-sail">Verified</p>
-                <p className="mt-1 text-xs font-semibold text-gray-500">School Access Only</p>
-              </div>
-            </div>
           </div>
         </section>
 
