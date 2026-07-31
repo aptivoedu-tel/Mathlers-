@@ -271,6 +271,12 @@ export default function RequestAccessPage() {
             </Button>
           </form>
         </div>
+
+        <div className="mt-6 text-center">
+          <Link href="/landing" className="inline-block text-sm font-semibold text-brand-primary hover:underline">
+            Back to Mathlers
+          </Link>
+        </div>
       </section>
     </PublicLayout>
   );

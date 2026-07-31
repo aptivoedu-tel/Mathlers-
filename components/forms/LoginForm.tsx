@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
@@ -89,6 +90,12 @@ export default function LoginForm() {
           Sign in
         </Button>
       </form>
+      
+      <div className="mt-6 text-center">
+        <Link href="/landing" className="inline-block text-sm font-semibold text-brand-primary hover:underline">
+          Back to Mathlers
+        </Link>
+      </div>
     </div>
   );
 }
