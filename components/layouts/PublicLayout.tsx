@@ -33,11 +33,11 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
       <header className="sticky top-0 z-40 border-b border-gray-200/80 bg-white/90 backdrop-blur-md transition-all">
         <nav className="container mx-auto px-4 py-3.5">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-dark rounded-xl flex items-center justify-center shadow-md shadow-brand-primary/20 group-hover:scale-105 transition-transform">
-                <span className="text-white font-bold text-xl font-sail">M</span>
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-xl">M</span>
               </div>
-              <span className="text-2xl font-bold text-gray-900 tracking-tight font-sail">Mathlers</span>
+              <span className="text-2xl font-bold text-gray-900">Mathlers</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-8">
@@ -62,7 +62,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
                   <Link href="/sign-in" className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition-all hover:border-brand-primary/30 hover:text-brand-primary hover:bg-brand-lighter/30">
                     Sign in
                   </Link>
-                  <Link href="/request-access" className="rounded-xl bg-brand-primary px-4.5 py-2 text-sm font-semibold text-white shadow-sm shadow-brand-primary/20 transition-all hover:bg-brand-dark hover:scale-[1.02]">
+                  <Link href="/request-access" className="rounded-xl bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
                     Request access
                   </Link>
                 </div>
@@ -117,11 +117,11 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-1">
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-brand-primary to-brand-dark rounded-xl flex items-center justify-center text-white font-bold text-lg font-sail shadow-sm">
-                  M
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">M</span>
                 </div>
-                <span className="text-2xl font-bold text-gray-900 tracking-tight font-sail">Mathlers</span>
+                <span className="text-2xl font-bold text-gray-900">Mathlers</span>
               </div>
               <p className="text-sm text-gray-600 leading-relaxed max-w-sm">
                 Empowering students and schools through structured practice and national mathematics competitions.
