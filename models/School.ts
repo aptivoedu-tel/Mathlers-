@@ -45,6 +45,7 @@ const SchoolSchema = new Schema<ISchool>(
       type: String,
       lowercase: true,
       trim: true,
+      unique: true,
       sparse: true,
     },
     password: {
@@ -132,9 +133,7 @@ const SchoolSchema = new Schema<ISchool>(
 );
 
 SchoolSchema.index({ name: 1 });
-SchoolSchema.index({ domain: 1 });
 SchoolSchema.index({ email: 1 });
-SchoolSchema.index({ username: 1 });
 SchoolSchema.index({ status: 1 });
 SchoolSchema.index({ city: 1 });
 SchoolSchema.index({ coordinator: 1 });

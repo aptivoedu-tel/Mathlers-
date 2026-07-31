@@ -21,6 +21,9 @@ const emptySubject = { name: '', code: '', grades: [] as string[], description: 
 const emptyGrade = { name: '', code: '', order: 0, isActive: true };
 const emptyTopic = { name: '', code: '', description: '', grade: '', chapter: '', subjects: [] as string[], subtopics: [] as Subtopic[], order: 0, isActive: true };
 
+type GradeForm = typeof emptyGrade;
+type SubjectForm = typeof emptySubject;
+
 const api = async (url: string, options?: RequestInit) => {
   const response = await fetch(url, options);
   const data = await response.json();
@@ -51,7 +54,9 @@ export default function ContentPage() {
   const [topics, setTopics] = useState<Topic[]>([]);
 
   const [subjectForm, setSubjectForm] = useState(emptySubject);
+  const [subjectRows, setSubjectRows] = useState<SubjectForm[]>([{ ...emptySubject }]);
   const [gradeForm, setGradeForm] = useState(emptyGrade);
+  const [gradeRows, setGradeRows] = useState<GradeForm[]>([{ ...emptyGrade }]);
   const [topicForm, setTopicForm] = useState(emptyTopic);
 
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
@@ -86,13 +91,21 @@ export default function ContentPage() {
 
   const openSubject = (subject?: Subject) => {
     setEditingSubject(subject || null);
-    setSubjectForm(subject ? { name: subject.name, code: subject.code, grades: subject.grades?.map((grade) => grade._id) || [], description: subject.description || '', color: subject.color || '#C1121F', order: subject.order, isActive: subject.isActive } : emptySubject);
+    if (subject) {
+      setSubjectForm({ name: subject.name, code: subject.code, grades: subject.grades?.map((grade) => grade._id) || [], description: subject.description || '', color: subject.color || '#C1121F', order: subject.order, isActive: subject.isActive });
+    } else {
+      setSubjectRows([{ ...emptySubject }]);
+    }
     setSubjectModal(true);
   };
 
   const openGrade = (grade?: Grade) => {
     setEditingGrade(grade || null);
-    setGradeForm(grade ? { name: grade.name, code: grade.code, order: grade.order || 0, isActive: grade.isActive ?? true } : emptyGrade);
+    if (grade) {
+      setGradeForm({ name: grade.name, code: grade.code, order: grade.order || 0, isActive: grade.isActive ?? true });
+    } else {
+      setGradeRows([{ ...emptyGrade }]);
+    }
     setGradeModal(true);
   };
 
@@ -111,10 +124,20 @@ export default function ContentPage() {
   const saveSubject = async (event: React.FormEvent) => {
     event.preventDefault(); setSaving(true);
     try {
-      await api(editingSubject ? `/api/admin/subjects/${editingSubject._id}` : '/api/admin/subjects', {
-        method: editingSubject ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(subjectForm),
-      });
-      setSubjectModal(false); setMessage(`Subject ${editingSubject ? 'updated' : 'created'}.`); await load();
+      if (editingSubject) {
+        await api(`/api/admin/subjects/${editingSubject._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(subjectForm) });
+        setMessage('Subject updated.');
+      } else {
+        const results = await Promise.allSettled(
+          subjectRows.filter(r => r.name.trim() && r.code.trim()).map(row =>
+            api('/api/admin/subjects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(row) })
+          )
+        );
+        const failed = results.filter(r => r.status === 'rejected');
+        const created = results.filter(r => r.status === 'fulfilled').length;
+        setMessage(failed.length ? `${created} created; ${failed.length} failed: ${(failed[0] as PromiseRejectedResult).reason?.message}` : `${created} subject${created !== 1 ? 's' : ''} created.`);
+      }
+      setSubjectModal(false); await load();
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Unable to save subject'); }
     finally { setSaving(false); }
   };
@@ -122,10 +145,20 @@ export default function ContentPage() {
   const saveGrade = async (event: React.FormEvent) => {
     event.preventDefault(); setSaving(true);
     try {
-      await api(editingGrade ? `/api/admin/grades/${editingGrade._id}` : '/api/admin/grades', {
-        method: editingGrade ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(gradeForm),
-      });
-      setGradeModal(false); setMessage(`Grade ${editingGrade ? 'updated' : 'created'}.`); await load();
+      if (editingGrade) {
+        await api(`/api/admin/grades/${editingGrade._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(gradeForm) });
+        setMessage('Grade updated.');
+      } else {
+        const results = await Promise.allSettled(
+          gradeRows.filter(r => r.name.trim() && r.code.trim()).map(row =>
+            api('/api/admin/grades', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(row) })
+          )
+        );
+        const failed = results.filter(r => r.status === 'rejected');
+        const created = results.filter(r => r.status === 'fulfilled').length;
+        setMessage(failed.length ? `${created} created; ${failed.length} failed: ${(failed[0] as PromiseRejectedResult).reason?.message}` : `${created} grade${created !== 1 ? 's' : ''} created.`);
+      }
+      setGradeModal(false); await load();
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Unable to save grade'); }
     finally { setSaving(false); }
   };
@@ -247,52 +280,73 @@ export default function ContentPage() {
         title={editingSubject ? 'Edit subject' : 'Add subject'}
       >
         <form id="subject-form" onSubmit={saveSubject} className="space-y-5">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <ModalField label="Name" htmlFor="subject-name" helper="Shown in lists and authoring filters.">
-              <input id="subject-name" required value={subjectForm.name} onChange={(event) => setSubjectForm({ ...subjectForm, name: event.target.value })} className={inputClass} placeholder="Mathematics" />
-            </ModalField>
-            <ModalField label="Code" htmlFor="subject-code" helper="Use a short unique code.">
-              <input id="subject-code" required value={subjectForm.code} onChange={(event) => setSubjectForm({ ...subjectForm, code: event.target.value.toUpperCase() })} className={`${inputClass} font-mono uppercase`} placeholder="MATH" />
-            </ModalField>
-          </div>
-
-          <ModalField label="Description" htmlFor="subject-description" helper="Optional context for admins reviewing the subject list.">
-            <textarea id="subject-description" value={subjectForm.description} onChange={(event) => setSubjectForm({ ...subjectForm, description: event.target.value })} className={`${inputClass} min-h-24 resize-y`} rows={3} />
-          </ModalField>
-
-          <fieldset className="rounded-lg border border-gray-200 bg-gray-50/70 p-4">
-            <legend className="px-1 text-sm font-semibold text-gray-800">Grades</legend>
-            <p className="mt-1 text-xs leading-5 text-gray-500">Leave empty when the subject is available to every student grade.</p>
-            <div className="mt-3 grid gap-2 sm:grid-cols-3">
-              {grades.map((grade) => {
-                const selected = subjectForm.grades.includes(grade._id);
-                return (
-                  <label key={grade._id} className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm font-medium transition focus-within:ring-2 focus-within:ring-brand-primary/20 ${selected ? 'border-brand-primary bg-brand-lighter/40 text-gray-950' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}>
-                    <input type="checkbox" checked={selected} onChange={() => toggleSubjectGrade(grade._id)} className="sr-only" />
-                    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${selected ? 'border-brand-primary bg-brand-primary text-white' : 'border-gray-300 bg-white'}`}>{selected && <Check className="h-3.5 w-3.5" />}</span>
-                    <span className="min-w-0 truncate">{grade.name}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <ModalField label="Color" htmlFor="subject-color">
-              <div className="mt-2 flex items-center gap-3 rounded-lg border border-gray-300 bg-white px-3 py-2">
-                <input id="subject-color" type="color" value={subjectForm.color} onChange={(event) => setSubjectForm({ ...subjectForm, color: event.target.value })} className="h-8 w-12 shrink-0 cursor-pointer rounded-md border-0 bg-transparent p-0" />
-                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Hex</span>
-                <output htmlFor="subject-color" className="font-mono text-sm text-gray-700">{subjectForm.color.toUpperCase()}</output>
+          {editingSubject ? (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ModalField label="Name" htmlFor="subject-name" helper="Shown in lists and authoring filters.">
+                  <input id="subject-name" required value={subjectForm.name} onChange={(e) => setSubjectForm({ ...subjectForm, name: e.target.value })} className={inputClass} placeholder="Mathematics" />
+                </ModalField>
+                <ModalField label="Code" htmlFor="subject-code" helper="Use a short unique code.">
+                  <input id="subject-code" required value={subjectForm.code} onChange={(e) => setSubjectForm({ ...subjectForm, code: e.target.value.toUpperCase() })} className={`${inputClass} font-mono uppercase`} placeholder="MATH" />
+                </ModalField>
               </div>
-            </ModalField>
-            <ModalField label="Display order" htmlFor="subject-order">
-              <input id="subject-order" type="number" value={subjectForm.order} onChange={(event) => setSubjectForm({ ...subjectForm, order: Number(event.target.value) })} className={inputClass} />
-            </ModalField>
-          </div>
-
+              <ModalField label="Description" htmlFor="subject-description" helper="Optional context for admins reviewing the subject list.">
+                <textarea id="subject-description" value={subjectForm.description} onChange={(e) => setSubjectForm({ ...subjectForm, description: e.target.value })} className={`${inputClass} min-h-24 resize-y`} rows={3} />
+              </ModalField>
+              <fieldset className="rounded-lg border border-gray-200 bg-gray-50/70 p-4">
+                <legend className="px-1 text-sm font-semibold text-gray-800">Grades</legend>
+                <p className="mt-1 text-xs leading-5 text-gray-500">Leave empty when the subject is available to every student grade.</p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                  {grades.map((grade) => {
+                    const selected = subjectForm.grades.includes(grade._id);
+                    return (
+                      <label key={grade._id} className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm font-medium transition ${selected ? 'border-brand-primary bg-brand-lighter/40 text-gray-950' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}>
+                        <input type="checkbox" checked={selected} onChange={() => toggleSubjectGrade(grade._id)} className="sr-only" />
+                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${selected ? 'border-brand-primary bg-brand-primary text-white' : 'border-gray-300 bg-white'}`}>{selected && <Check className="h-3.5 w-3.5" />}</span>
+                        <span className="min-w-0 truncate">{grade.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ModalField label="Color" htmlFor="subject-color">
+                  <div className="mt-2 flex items-center gap-3 rounded-lg border border-gray-300 bg-white px-3 py-2">
+                    <input id="subject-color" type="color" value={subjectForm.color} onChange={(e) => setSubjectForm({ ...subjectForm, color: e.target.value })} className="h-8 w-12 shrink-0 cursor-pointer rounded-md border-0 bg-transparent p-0" />
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Hex</span>
+                    <output htmlFor="subject-color" className="font-mono text-sm text-gray-700">{subjectForm.color.toUpperCase()}</output>
+                  </div>
+                </ModalField>
+                <ModalField label="Display order" htmlFor="subject-order">
+                  <input id="subject-order" type="number" value={subjectForm.order} onChange={(e) => setSubjectForm({ ...subjectForm, order: Number(e.target.value) })} className={inputClass} />
+                </ModalField>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-xs text-gray-500">Fill in one or more subjects below. Click <strong>+ Add More</strong> to add additional rows.</p>
+              <div className="rounded-lg border border-gray-200 overflow-hidden">
+                <div className="grid grid-cols-[1fr_110px_44px] gap-2 bg-gray-50 px-3 py-2 text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <span>Name</span><span>Code</span><span />
+                </div>
+                <div className="divide-y divide-gray-100">
+                  {subjectRows.map((row, i) => (
+                    <div key={i} className="grid grid-cols-[1fr_110px_44px] gap-2 px-3 py-2 items-center">
+                      <input required value={row.name} onChange={(e) => setSubjectRows(rows => rows.map((r, idx) => idx === i ? { ...r, name: e.target.value } : r))} className={inlineInputClass} placeholder="Mathematics" />
+                      <input required value={row.code} onChange={(e) => setSubjectRows(rows => rows.map((r, idx) => idx === i ? { ...r, code: e.target.value.toUpperCase() } : r))} className={`${inlineInputClass} font-mono uppercase`} placeholder="MATH" />
+                      <button type="button" disabled={subjectRows.length === 1} onClick={() => setSubjectRows(rows => rows.filter((_, idx) => idx !== i))} className="inline-flex h-10 items-center justify-center rounded-lg text-red-500 hover:bg-red-50 disabled:opacity-30"><Trash2 className="h-4 w-4" /></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <button type="button" onClick={() => setSubjectRows(rows => [...rows, { ...emptySubject }])} className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 w-full justify-center">
+                <Plus className="h-4 w-4" /> Add More
+              </button>
+            </>
+          )}
           <div className={modalFooterClass}>
             <button type="button" onClick={() => setSubjectModal(false)} className={`${modalButtonClass} border border-gray-300 bg-white text-gray-700 hover:bg-gray-50`}>Cancel</button>
-            <button type="submit" disabled={saving} className={`${modalButtonClass} bg-brand-primary text-white shadow-sm hover:bg-brand-dark`}>{saving ? 'Saving...' : 'Save subject'}</button>
+            <button type="submit" disabled={saving} className={`${modalButtonClass} bg-brand-primary text-white shadow-sm hover:bg-brand-dark`}>{saving ? 'Saving...' : editingSubject ? 'Save subject' : `Save ${subjectRows.filter(r=>r.name.trim()).length || 1} subject${subjectRows.filter(r=>r.name.trim()).length !== 1 ? 's' : ''}`}</button>
           </div>
         </form>
       </Modal>
@@ -303,31 +357,42 @@ export default function ContentPage() {
         onClose={() => setGradeModal(false)}
         title={editingGrade ? 'Edit grade' : 'Add grade'}
       >
-        <form onSubmit={saveGrade} className="space-y-5">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <ModalField label="Grade Name" htmlFor="grade-name" helper="e.g. Grade 1, Grade 7, O Levels">
-              <input id="grade-name" required value={gradeForm.name} onChange={(event) => setGradeForm({ ...gradeForm, name: event.target.value })} className={inputClass} placeholder="Grade 7" />
-            </ModalField>
-            <ModalField label="Code" htmlFor="grade-code" helper="Unique short code, e.g. G7">
-              <input id="grade-code" required value={gradeForm.code} onChange={(event) => setGradeForm({ ...gradeForm, code: event.target.value.toUpperCase() })} className={`${inputClass} font-mono uppercase`} placeholder="G7" />
-            </ModalField>
-          </div>
-
-          <ModalField label="Display Order" htmlFor="grade-order" helper="Lower numbers appear first">
-            <input id="grade-order" type="number" value={gradeForm.order} onChange={(event) => setGradeForm({ ...gradeForm, order: Number(event.target.value) })} className={inputClass} />
-          </ModalField>
-
-          <label className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-700">
-            <input type="checkbox" checked={gradeForm.isActive} onChange={(event) => setGradeForm({ ...gradeForm, isActive: event.target.checked })} className="mt-0.5 h-4 w-4 shrink-0 accent-brand-primary" />
-            <span>
-              <span className="block font-semibold text-gray-800">Active Grade</span>
-              <span className="mt-0.5 block text-xs leading-5 text-gray-500">Available across platform forms and competitions</span>
-            </span>
-          </label>
-
+        <form onSubmit={saveGrade} className="space-y-4">
+          {editingGrade ? (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <ModalField label="Grade Name" htmlFor="grade-name" helper="e.g. Grade 1, Grade 7, O Levels">
+                  <input id="grade-name" required value={gradeForm.name} onChange={(e) => setGradeForm({ ...gradeForm, name: e.target.value })} className={inputClass} placeholder="Grade 7" />
+                </ModalField>
+                <ModalField label="Code" htmlFor="grade-code" helper="Unique short code, e.g. G7">
+                  <input id="grade-code" required value={gradeForm.code} onChange={(e) => setGradeForm({ ...gradeForm, code: e.target.value.toUpperCase() })} className={`${inputClass} font-mono uppercase`} placeholder="G7" />
+                </ModalField>
+              </div>
+              <ModalField label="Display Order" htmlFor="grade-order" helper="Lower numbers appear first">
+                <input id="grade-order" type="number" value={gradeForm.order} onChange={(e) => setGradeForm({ ...gradeForm, order: Number(e.target.value) })} className={inputClass} />
+              </ModalField>
+            </>
+          ) : (
+            <>
+              <p className="text-xs text-gray-500">Fill in one or more grades below. Click <strong>+ Add More</strong> to add additional rows.</p>
+              <div className="space-y-2">
+                {gradeRows.map((row, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_120px_60px_44px] gap-2 items-center">
+                    <input required value={row.name} onChange={(e) => setGradeRows(rows => rows.map((r, idx) => idx === i ? { ...r, name: e.target.value } : r))} className={inlineInputClass} placeholder="Grade 7" />
+                    <input required value={row.code} onChange={(e) => setGradeRows(rows => rows.map((r, idx) => idx === i ? { ...r, code: e.target.value.toUpperCase() } : r))} className={`${inlineInputClass} font-mono uppercase`} placeholder="G7" />
+                    <input type="number" value={row.order} onChange={(e) => setGradeRows(rows => rows.map((r, idx) => idx === i ? { ...r, order: Number(e.target.value) } : r))} className={inlineInputClass} placeholder="0" title="Order" />
+                    <button type="button" disabled={gradeRows.length === 1} onClick={() => setGradeRows(rows => rows.filter((_, idx) => idx !== i))} className="inline-flex h-11 items-center justify-center rounded-lg text-red-500 hover:bg-red-50 disabled:opacity-30"><Trash2 className="h-4 w-4" /></button>
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={() => setGradeRows(rows => [...rows, { ...emptyGrade }])} className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 w-full justify-center">
+                <Plus className="h-4 w-4" /> Add More
+              </button>
+            </>
+          )}
           <div className={modalFooterClass}>
             <button type="button" onClick={() => setGradeModal(false)} className={`${modalButtonClass} border border-gray-300 bg-white text-gray-700 hover:bg-gray-50`}>Cancel</button>
-            <button type="submit" disabled={saving} className={`${modalButtonClass} bg-brand-primary text-white shadow-sm hover:bg-brand-dark`}>{saving ? 'Saving...' : 'Save grade'}</button>
+            <button type="submit" disabled={saving} className={`${modalButtonClass} bg-brand-primary text-white shadow-sm hover:bg-brand-dark`}>{saving ? 'Saving...' : editingGrade ? 'Save grade' : `Save ${gradeRows.filter(r=>r.name.trim()).length || 1} grade${gradeRows.filter(r=>r.name.trim()).length !== 1 ? 's' : ''}`}</button>
           </div>
         </form>
       </Modal>
