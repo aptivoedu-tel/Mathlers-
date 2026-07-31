@@ -68,6 +68,10 @@
 
 /* ─── Base Layer ─── */
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background: var(--surface-secondary);
     color: var(--text-primary);
@@ -79,6 +83,10 @@
   [data-portal] {
     background: var(--surface-secondary);
   }
+}
+
+.font-sail {
+  font-family: var(--font-sail), 'Sail', cursive, sans-serif;
 }
 
 /* ─── Card System ─── */
