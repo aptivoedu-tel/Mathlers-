@@ -93,7 +93,7 @@ export default function LandingPage() {
             <h1 className="text-5xl tracking-tight text-gray-950 sm:text-7xl leading-[1.15]">
               <span className="font-sail">Mathematics</span>,{' '}
               <span className="font-sail bg-gradient-to-r from-brand-primary via-brand-dark to-brand-primary bg-clip-text text-transparent">
-                Made Ready for Competition.
+                Made Ready for&nbsp;&#8203;Competition.
               </span>
             </h1>
 

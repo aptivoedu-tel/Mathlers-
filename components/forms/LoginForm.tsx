@@ -51,7 +51,6 @@ export default function LoginForm() {
         <div className="inline-flex items-center justify-center w-12 h-12 bg-brand-primary text-white rounded-2xl font-bold text-xl mb-4 shadow-sm">
           M
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Welcome back</h1>
         <p className="text-sm text-gray-500 mt-1">Sign in to your Mathlers account</p>
       </div>
 

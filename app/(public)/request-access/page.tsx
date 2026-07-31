@@ -117,16 +117,24 @@ export default function RequestAccessPage() {
 
   return (
     <PublicLayout>
-      <section className="mx-auto max-w-3xl px-6 py-12">
-        <div className="text-center mb-8">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-lighter text-brand-primary mb-3">
-            <Building2 className="h-6 w-6" />
+      <div className="relative min-h-screen bg-gradient-to-b from-white via-brand-lighter/10 to-gray-50/70">
+        {/* Fading Grid Pattern Overlay */}
+        <div 
+          className="absolute inset-0 bg-grid-pattern pointer-events-none"
+          style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)' }}
+        />
+        {/* Subtle radial brand glow */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,_rgba(var(--brand-primary-rgb),0.07),transparent)] pointer-events-none" />
+
+        <section className="relative z-10 mx-auto max-w-3xl px-6 py-12 sm:py-20">
+          <div className="text-center mb-10">
+            <h1 className="text-4xl sm:text-5xl text-gray-950 font-sail drop-shadow-sm mb-4">
+              School Registration Request
+            </h1>
+            <p className="text-sm text-gray-600 max-w-xl mx-auto leading-relaxed">
+              Submit your school details to request a Mathlers organization account. Once reviewed and approved by an admin, you can log in to your school workspace.
+            </p>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">School Registration Request</h1>
-          <p className="mt-2 text-sm text-gray-600 max-w-xl mx-auto">
-            Submit your school details to request a Mathlers organization account. Once reviewed and approved by an admin, you can log in to your school workspace.
-          </p>
-        </div>
 
         <div className="rounded-2xl bg-white p-8 shadow-card border border-gray-200/90">
           {error && (
@@ -278,6 +286,7 @@ export default function RequestAccessPage() {
           </Link>
         </div>
       </section>
+      </div>
     </PublicLayout>
   );
 }
