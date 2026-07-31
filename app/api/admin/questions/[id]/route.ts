@@ -124,12 +124,10 @@ export async function DELETE(
     if (!validId(id)) return NextResponse.json(questionError('Invalid question id', 'INVALID_ID'), { status: 400 });
 
     await connectDB();
-    const question = await QuestionModel.findById(id);
-    if (!question) return NextResponse.json(questionError('Question not found', 'NOT_FOUND'), { status: 404 });
+    const deleted = await QuestionModel.findByIdAndDelete(id);
+    if (!deleted) return NextResponse.json(questionError('Question not found', 'NOT_FOUND'), { status: 404 });
 
-    question.status = 'archived';
-    await question.save();
-    return NextResponse.json({ success: true, message: 'Question archived successfully' });
+    return NextResponse.json({ success: true, message: 'Question deleted successfully' });
   } catch (error) {
     console.error('Error deleting question:', error);
     return NextResponse.json(questionError('Failed to delete question', 'INTERNAL_ERROR'), { status: 500 });

@@ -360,7 +360,7 @@ export default function QuestionsPage() {
   };
 
   const handleDeleteQuestion = async (id: string) => {
-    if (!confirm('Are you sure you want to archive this question?')) return;
+    if (!confirm('Are you sure you want to permanently delete this question? This action cannot be undone.')) return;
     
     try {
       const res = await fetch(`/api/admin/questions/${id}`, {
@@ -370,14 +370,14 @@ export default function QuestionsPage() {
       const data = await res.json();
       
       if (data.success) {
-        setNotice('Question archived successfully.');
+        setNotice('Question deleted successfully.');
         fetchQuestions();
       } else {
-        setNotice(data.error || 'Failed to archive question');
+        setNotice(data.error || 'Failed to delete question');
       }
     } catch (error) {
       console.error('Error deleting question:', error);
-      setNotice('Failed to archive question');
+      setNotice('Failed to delete question');
     }
   };
 
@@ -668,7 +668,7 @@ export default function QuestionsPage() {
                         <button 
                           onClick={() => handleDeleteQuestion(q._id)}
                           className="rounded-md p-2 hover:bg-red-50 transition-colors"
-                          title="Archive question"
+                          title="Delete question"
                         >
                           <Trash2 className="w-4 h-4 text-red-600" />
                         </button>
