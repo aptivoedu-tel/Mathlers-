@@ -24,6 +24,7 @@ interface PublicLayoutProps {
 
 const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isMenuContentVisible, setIsMenuContentVisible] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
   const { data: session, status } = useSession();
   const pathname = usePathname();
@@ -39,22 +40,38 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
     return () => window.removeEventListener('scroll', onScroll);
   }, [isLanding]);
 
+  const closeMenu = () => {
+    setIsMenuContentVisible(false);
+    setTimeout(() => setIsMenuOpen(false), 200);
+  };
+
+  const toggleMenu = () => {
+    if (isMenuOpen) {
+      // Closing: hide content first, then wait 200ms to hide background
+      closeMenu();
+    } else {
+      // Opening: show background first, wait 300ms, then show content
+      setIsMenuOpen(true);
+      setTimeout(() => setIsMenuContentVisible(true), 300);
+    }
+  };
+
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     if (typeof window !== 'undefined') {
       const onLanding = window.location.pathname === '/' || window.location.pathname === '/landing';
       if (onLanding) {
         e.preventDefault();
-        setIsMenuOpen(false);
+        closeMenu();
         document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
       }
     }
   };
 
-  // Landing: fixed + fully transparent at top of page, glass when scrolled
+  // Landing: fixed + fully transparent at top of page, glass when scrolled OR menu is open
   // Other pages: sticky with solid border
   const headerClass = isLanding
     ? `fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
+        scrolled || isMenuOpen
           ? 'bg-white/90 backdrop-blur-md shadow-sm'
           : 'bg-transparent'
       }`
@@ -117,7 +134,7 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
 
             <button
               className="md:hidden p-2 text-gray-700 hover:text-brand-primary"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={toggleMenu}
               aria-label="Toggle menu"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -125,7 +142,13 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
           </div>
 
           {isMenuOpen && (
-            <div className="md:hidden mt-4 pb-4 space-y-3 border-t border-gray-100 pt-4">
+            <div 
+              className={`md:hidden mt-4 space-y-3 pt-4 transition-all duration-200 ease-in-out ${
+                isMenuContentVisible 
+                  ? 'opacity-100 max-h-[400px] border-t border-gray-100 pb-4' 
+                  : 'opacity-0 max-h-0 border-transparent pb-0 pointer-events-none'
+              }`}
+            >
               <a
                 href="/#features"
                 onClick={(e) => handleNavClick(e, 'features')}
