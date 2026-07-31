@@ -4,33 +4,65 @@ import React from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 import SignOutButton from '@/components/ui/SignOutButton';
+
+/** Return the correct dashboard path based on the user's role. */
+function getDashboardUrl(role?: string): string {
+  switch (role) {
+    case 'super_admin': return '/admin/dashboard';
+    case 'admin':       return '/school/dashboard';
+    case 'teacher':     return '/teacher/dashboard';
+    case 'student':     return '/student/dashboard';
+    default:            return '/sign-in';
+  }
+}
+
 interface PublicLayoutProps {
   children: React.ReactNode;
 }
 
 const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [scrolled, setScrolled] = React.useState(false);
   const { data: session, status } = useSession();
+  const pathname = usePathname();
   const year = new Date().getFullYear();
+
+  const isLanding = pathname === '/' || pathname === '/landing';
+
+  // On landing page, listen to scroll to turn the nav opaque after hero
+  React.useEffect(() => {
+    if (!isLanding) return;
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isLanding]);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     if (typeof window !== 'undefined') {
-      const isLandingPage = window.location.pathname === '/' || window.location.pathname === '/landing';
-      if (isLandingPage) {
+      const onLanding = window.location.pathname === '/' || window.location.pathname === '/landing';
+      if (onLanding) {
         e.preventDefault();
         setIsMenuOpen(false);
-        const element = document.getElementById(sectionId);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
+        document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
       }
     }
   };
 
+  // Landing: fixed + fully transparent at top of page, glass when scrolled
+  // Other pages: sticky with solid border
+  const headerClass = isLanding
+    ? `fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? 'bg-white/90 backdrop-blur-md shadow-sm'
+          : 'bg-transparent'
+      }`
+    : 'sticky top-0 z-40 border-b border-gray-200/80 bg-white/90 backdrop-blur-md';
+
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-40 border-b border-gray-200/80 bg-white/90 backdrop-blur-md transition-all">
+      <header className={headerClass}>
         <nav className="container mx-auto px-4 py-3.5">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
@@ -55,7 +87,21 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
               >
                 Access
               </a>
-              {status === 'loading' ? null : session ? (
+              {status === 'loading' ? null : isLanding ? (
+                // On landing: always show Sign In + Request Access
+                // If already signed in, Sign In goes straight to dashboard
+                <div className="flex items-center gap-3">
+                  <Link
+                    href={session ? getDashboardUrl((session.user as any)?.role) : '/sign-in'}
+                    className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition-all hover:border-brand-primary/30 hover:text-brand-primary hover:bg-brand-lighter/30"
+                  >
+                    Sign in
+                  </Link>
+                  <Link href="/request-access" className="rounded-xl bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
+                    Request access
+                  </Link>
+                </div>
+              ) : session ? (
                 <div className="w-32"><SignOutButton /></div>
               ) : (
                 <div className="flex items-center gap-3">
@@ -94,7 +140,19 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({ children }) => {
               >
                 Access
               </a>
-              {status === 'loading' ? null : session ? (
+              {status === 'loading' ? null : isLanding ? (
+                <div className="pt-2 flex flex-col gap-2">
+                  <Link
+                    href={session ? getDashboardUrl((session.user as any)?.role) : '/sign-in'}
+                    className="block w-full text-center rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-700 hover:text-brand-primary"
+                  >
+                    Sign in
+                  </Link>
+                  <Link href="/request-access" className="block w-full text-center rounded-xl bg-brand-primary py-2.5 text-sm font-semibold text-white hover:bg-brand-dark">
+                    Request access
+                  </Link>
+                </div>
+              ) : session ? (
                 <div className="w-32 pt-2"><SignOutButton /></div>
               ) : (
                 <div className="pt-2 flex flex-col gap-2">

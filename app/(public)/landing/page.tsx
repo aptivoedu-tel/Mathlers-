@@ -72,8 +72,15 @@ export default function LandingPage() {
     <PublicLayout>
       <main className="overflow-hidden">
         {/* ─── HERO SECTION ─── */}
-        <section className="relative border-b border-gray-200/80 bg-gradient-to-b from-white via-brand-lighter/10 to-gray-50/50 px-6 py-20 sm:py-28">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-primary/10 via-transparent to-transparent pointer-events-none" />
+        {/* Fixed nav overlays this section — one shared background, zero seam */}
+        <section className="relative bg-gradient-to-b from-white via-brand-lighter/10 to-gray-50/70 px-6 pt-32 pb-20 sm:pt-40 sm:pb-28">
+          {/* Fading Grid Pattern Overlay */}
+          <div 
+            className="absolute inset-0 bg-grid-pattern pointer-events-none"
+            style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)' }}
+          />
+          {/* Subtle radial brand glow */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,_rgba(var(--brand-primary-rgb),0.07),transparent)] pointer-events-none" />
 
           <div className="relative mx-auto max-w-5xl text-center">
             {/* Pill Badge */}
@@ -84,7 +91,7 @@ export default function LandingPage() {
 
             {/* Sail Font Main Heading */}
             <h1 className="text-5xl tracking-tight text-gray-950 sm:text-7xl leading-[1.15]">
-              <span className="font-lora italic font-bold">Mathematics</span>,{' '}
+              <span className="font-sail">Mathematics</span>,{' '}
               <span className="font-sail bg-gradient-to-r from-brand-primary via-brand-dark to-brand-primary bg-clip-text text-transparent">
                 Made Ready for Competition.
               </span>

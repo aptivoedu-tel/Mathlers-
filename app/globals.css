@@ -85,6 +85,18 @@
   }
 }
 
+.font-lora {
+  font-family: var(--font-lora), 'Lora', serif;
+}
+
+/* Fine grid background for landing page */
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
 .font-sail {
   font-family: var(--font-sail), 'Sail', cursive, sans-serif;
 }
