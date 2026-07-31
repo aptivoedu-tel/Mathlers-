@@ -8,12 +8,18 @@ import Input from '@/components/ui/Input';
 import { CheckCircle2, Building2, ArrowLeft } from 'lucide-react';
 
 const COUNTRY_CODES = [
-  { code: '+92', label: '+92 (Pakistan)' },
-  { code: '+1', label: '+1 (US/Canada)' },
-  { code: '+44', label: '+44 (UK)' },
-  { code: '+971', label: '+971 (UAE)' },
-  { code: '+966', label: '+966 (Saudi Arabia)' },
-  { code: '+91', label: '+91 (India)' },
+  '+1', '+7', '+20', '+27', '+30', '+31', '+32', '+33', '+34', '+36', '+39', '+40', '+41', '+43', '+44', '+45', '+46', '+47', '+48', '+49',
+  '+51', '+52', '+53', '+54', '+55', '+56', '+57', '+58', '+60', '+61', '+62', '+63', '+64', '+65', '+66', '+81', '+82', '+84', '+86', '+90',
+  '+91', '+92', '+93', '+94', '+95', '+98', '+211', '+212', '+213', '+216', '+218', '+220', '+221', '+222', '+223', '+224', '+225', '+226',
+  '+227', '+228', '+229', '+230', '+231', '+232', '+233', '+234', '+235', '+236', '+237', '+238', '+239', '+240', '+241', '+242', '+243',
+  '+244', '+245', '+248', '+249', '+250', '+251', '+252', '+253', '+254', '+255', '+256', '+257', '+258', '+260', '+261', '+262', '+263',
+  '+264', '+265', '+266', '+267', '+268', '+269', '+290', '+291', '+297', '+298', '+299', '+350', '+351', '+352', '+353', '+354', '+355',
+  '+356', '+357', '+358', '+359', '+370', '+371', '+372', '+373', '+374', '+375', '+376', '+377', '+378', '+380', '+381', '+382', '+383',
+  '+385', '+386', '+387', '+389', '+420', '+421', '+423', '+500', '+501', '+502', '+503', '+504', '+505', '+506', '+507', '+508', '+509',
+  '+590', '+591', '+592', '+593', '+594', '+595', '+596', '+597', '+598', '+599', '+670', '+672', '+673', '+674', '+675', '+676', '+677',
+  '+678', '+679', '+680', '+681', '+682', '+683', '+685', '+686', '+687', '+688', '+689', '+691', '+692', '+850', '+852', '+853', '+855',
+  '+856', '+880', '+886', '+960', '+961', '+962', '+963', '+964', '+965', '+966', '+967', '+968', '+970', '+971', '+972', '+973', '+974',
+  '+975', '+976', '+977', '+992', '+993', '+994', '+995', '+996', '+998'
 ];
 
 export default function RequestAccessPage() {
@@ -157,7 +163,7 @@ export default function RequestAccessPage() {
                 />
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                  <label className="block text-[13px] font-medium text-gray-700 mb-1.5">
                     Contact Number <span className="text-red-500">*</span>
                   </label>
                   <div className="flex gap-2">
@@ -165,11 +171,11 @@ export default function RequestAccessPage() {
                       name="countryCode"
                       value={formData.countryCode}
                       onChange={handleChange}
-                      className="rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-xs font-medium text-gray-700 shadow-sm focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                      className="w-24 shrink-0 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-xs transition-all duration-150 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/10 hover:border-gray-300"
                     >
-                      {COUNTRY_CODES.map((c) => (
-                        <option key={c.code} value={c.code}>
-                          {c.label}
+                      {COUNTRY_CODES.map((code) => (
+                        <option key={code} value={code}>
+                          {code}
                         </option>
                       ))}
                     </select>
@@ -180,7 +186,7 @@ export default function RequestAccessPage() {
                       onChange={handleChange}
                       required
                       placeholder="300 1234567"
-                      className="flex-1 rounded-xl border border-gray-300 px-3.5 py-2.5 text-xs text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 shadow-xs placeholder:text-gray-400 transition-all duration-150 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/10 hover:border-gray-300"
                     />
                   </div>
                 </div>
@@ -240,7 +246,7 @@ export default function RequestAccessPage() {
                 />
 
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                  <label className="block text-[13px] font-medium text-gray-700 mb-1.5">
                     School Address <span className="text-red-500">*</span>
                   </label>
                   <textarea
@@ -250,7 +256,7 @@ export default function RequestAccessPage() {
                     required
                     rows={2}
                     placeholder="Full campus address"
-                    className="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-xs text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 shadow-xs placeholder:text-gray-400 transition-all duration-150 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/10 hover:border-gray-300"
                   />
                 </div>
               </div>
