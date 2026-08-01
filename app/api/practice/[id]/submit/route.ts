@@ -54,12 +54,9 @@ export async function POST(
 
   try {
     await connectDB();
-    const now = new Date();
     const practiceSet = await PracticeSetModel.findOne({
       _id: id,
       isPublished: true,
-      'availability.startDate': { $lte: now },
-      'availability.endDate': { $gte: now },
     }).populate({
     path: 'questions',
     match: { status: 'active' },

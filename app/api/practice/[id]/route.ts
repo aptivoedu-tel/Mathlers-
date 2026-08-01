@@ -11,17 +11,25 @@ type QuestionPayload = {
   difficulty?: string;
   marks?: number;
   estimatedTime?: number;
+  explanation?: string;
+  correctAnswer?: string;
 };
 
 type PracticeSetPayload = {
   _id: { toString(): string };
   name: string;
+  description?: string;
   type: string;
   timeLimit: number;
   attemptsAllowed: number;
   subject?: { name?: string };
   grade?: { name?: string };
   questions?: QuestionPayload[];
+  sections?: {
+    name: string;
+    instructions?: string;
+    questions: QuestionPayload[];
+  }[];
 };
 
 export async function GET(
@@ -46,25 +54,18 @@ export async function GET(
 
   try {
     await connectDB();
-    const now = new Date();
     const practiceSet = await PracticeSetModel.findOne({
       _id: id,
       isPublished: true,
-      $or: [
-        { 'availability.startDate': { $exists: false } },
-        { 'availability.startDate': { $lte: now } }
-      ],
-      $and: [
-        { $or: [{ 'availability.endDate': { $exists: false } }, { 'availability.endDate': { $gte: now } }] }
-      ]
     })
       .populate({
         path: 'questions',
         match: { status: 'active' },
-        select: 'question options difficulty marks estimatedTime',
+        select: 'question options difficulty marks estimatedTime explanation correctAnswer',
       })
       .populate('subject', 'name')
       .populate('grade', 'name')
+      .populate('sections.questions', 'question options difficulty marks estimatedTime explanation correctAnswer')
       .lean() as unknown as PracticeSetPayload | null;
 
     if (!practiceSet) {
@@ -83,6 +84,8 @@ export async function GET(
             difficulty: question.difficulty,
             marks: question.marks,
             estimatedTime: question.estimatedTime,
+            explanation: question.explanation,
+            correctAnswer: question.correctAnswer,
           }]
         : [];
     });
@@ -91,12 +94,33 @@ export async function GET(
       practiceSet: {
         id: practiceSet._id.toString(),
         name: practiceSet.name,
+        description: practiceSet.description,
         type: practiceSet.type,
         subject: practiceSet.subject?.name || 'General',
         grade: practiceSet.grade?.name || 'All Grades',
         timeLimit: practiceSet.timeLimit,
         attemptsAllowed: practiceSet.attemptsAllowed,
         questions,
+        sections: practiceSet.sections?.map(section => ({
+          name: section.name,
+          instructions: section.instructions,
+          questions: (section.questions || []).flatMap((question) => {
+            const options = question.options;
+            const hasOptions = ['A', 'B', 'C', 'D'].every((key) => typeof options?.[key] === 'string' && options[key].trim());
+            return typeof question.question === 'string' && question.question.trim() && hasOptions
+              ? [{
+                  id: question._id.toString(),
+                  question: question.question,
+                  options,
+                  difficulty: question.difficulty,
+                  marks: question.marks,
+                  estimatedTime: question.estimatedTime,
+                  explanation: question.explanation,
+                  correctAnswer: question.correctAnswer,
+                }]
+              : [];
+          }),
+        })) || [],
       },
     });
   } catch (error) {

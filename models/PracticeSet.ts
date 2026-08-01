@@ -30,6 +30,7 @@ export interface IPracticeSet extends BaseDocument {
     endDate: Date;
   };
   isPublished: boolean;
+  coverImage?: string;
   createdBy: mongoose.Types.ObjectId;
   analytics: {
     totalAttempts: number;
@@ -107,6 +108,10 @@ const PracticeSetSchema = new Schema<IPracticeSet>(
     isPublished: {
       type: Boolean,
       default: false,
+    },
+    coverImage: {
+      type: String,
+      trim: true,
     },
     createdBy: {
       type: Schema.Types.ObjectId,

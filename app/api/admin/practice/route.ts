@@ -62,6 +62,7 @@ const normalize = async (body: Record<string, unknown>) => {
     attemptsAllowed: Number(body.attemptsAllowed),
     availability,
     isPublished: Boolean(body.isPublished),
+    coverImage: typeof body.coverImage === 'string' ? body.coverImage.trim() : undefined,
   };
 };
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { BookOpen, Eye, FilePlus2, Filter, Plus, Trash2 } from 'lucide-react';
+import { BookOpen, Eye, FilePlus2, Filter, Plus, Trash2, Upload, X, Loader2 } from 'lucide-react';
 import GlassCard from '@/components/ui/GlassCard';
 import Modal from '@/components/ui/Modal';
 import PrimaryButton from '@/components/ui/PrimaryButton';
@@ -12,7 +12,7 @@ type Topic = { _id: string; name: string; subtopics?: { _id: string; name: strin
 type Question = { _id: string; question: string; subject?: Lookup; grade?: Lookup; topic?: Topic; subtopic?: string; difficulty: string; marks: number };
 type Section = { name: string; instructions: string; questions: string[] };
 type SectionFilter = { subject: string; grade: string; topic: string; subtopic: string };
-type PracticeBook = { _id: string; name: string; description?: string; type: string; difficulty: string; sections: { name: string; questions: string[] }[]; questions: string[]; timeLimit: number; attemptsAllowed: number; isPublished: boolean };
+type PracticeBook = { _id: string; name: string; description?: string; type: string; difficulty: string; sections: { name: string; questions: string[] }[]; questions: string[]; timeLimit: number; attemptsAllowed: number; isPublished: boolean; coverImage?: string };
 
 const blankSection = (): Section => ({ name: '', instructions: '', questions: [] });
 const blankFilter = (): SectionFilter => ({ subject: '', grade: '', topic: '', subtopic: '' });
@@ -26,7 +26,9 @@ export default function AdminPracticePage() {
   const [preview, setPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState('');
-  const [form, setForm] = useState({ name: '', description: '', type: 'mixed_practice', difficulty: 'mixed', timeLimit: 1800, attemptsAllowed: 3, startDate: '', endDate: '', isPublished: false, sections: [blankSection()] });
+  const [form, setForm] = useState({ name: '', description: '', type: 'mixed_practice', difficulty: 'mixed', timeLimit: 1800, attemptsAllowed: 3, startDate: '', endDate: '', isPublished: false, coverImage: '', sections: [blankSection()] });
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [filters, setFilters] = useState<Record<number, SectionFilter>>({ 0: blankFilter() });
   const [topicsMap, setTopicsMap] = useState<Record<number, Topic[]>>({});
 
@@ -67,6 +69,33 @@ export default function AdminPracticePage() {
       if (changes.subject !== current.subject) setFilters(p => ({ ...p, [index]: { ...next, topic: '', subtopic: '' } }));
     }
     if ('topic' in changes) setFilters(p => ({ ...p, [index]: { ...next, subtopic: '' } }));
+  };
+
+  const handleCoverUpload = async (file: File) => {
+    if (!file) return;
+    
+    setUploadingCover(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to upload image');
+      }
+      
+      setForm(prev => ({ ...prev, coverImage: data.url }));
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : 'Failed to upload image');
+    } finally {
+      setUploadingCover(false);
+    }
   };
 
   const visibleQuestions = (index: number) => {
@@ -119,7 +148,8 @@ export default function AdminPracticePage() {
       console.log('[Practice API response]', res.status, data);
       if (!data.success) throw new Error(data.error || 'Unable to create practice book');
       setOpen(false);
-      setForm({ name: '', description: '', type: 'mixed_practice', difficulty: 'mixed', timeLimit: 1800, attemptsAllowed: 3, startDate: '', endDate: '', isPublished: false, sections: [blankSection()] });
+      setForm({ name: '', description: '', type: 'mixed_practice', difficulty: 'mixed', timeLimit: 1800, attemptsAllowed: 3, startDate: '', endDate: '', isPublished: false, coverImage: '', sections: [blankSection()] });
+      setCoverFile(null);
       setFilters({ 0: blankFilter() });
       setTopicsMap({});
       setNotice('Practice book created.');
@@ -167,6 +197,11 @@ export default function AdminPracticePage() {
 
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {books.map(book => <GlassCard key={book._id} className="flex min-h-64 flex-col p-5 bg-white border border-gray-200/90 shadow-card">
+        {book.coverImage && (
+          <div className="mb-4 -mx-5 -mt-5">
+            <img src={book.coverImage} alt={book.name} className="w-full aspect-[2/3] object-cover" />
+          </div>
+        )}
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="font-bold text-gray-900">{book.name}</h2>
@@ -182,7 +217,7 @@ export default function AdminPracticePage() {
       {!books.length && <div className="col-span-full border-y border-gray-200 py-16 text-center text-gray-500"><BookOpen className="mx-auto mb-3 h-10 w-10 text-gray-300" /><p>No practice books yet. Create one from the question bank.</p></div>}
     </div>
 
-    <Modal isOpen={open} onClose={() => setOpen(false)} title="Create practice book" size="xl">
+    <Modal isOpen={open} onClose={() => { setOpen(false); setCoverFile(null); setForm(prev => ({ ...prev, coverImage: '' })); }} title="Create practice book" size="xl">
       <form onSubmit={createBook} className="space-y-6">
         {/* Book-level details */}
         <div className="grid gap-4 sm:grid-cols-2">
@@ -190,6 +225,54 @@ export default function AdminPracticePage() {
           <label className="text-sm font-semibold text-gray-700">Practice type<select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} className="mt-1.5 w-full rounded-lg border border-gray-300 px-3 py-2.5"><option value="chapter_practice">Chapter practice</option><option value="revision_practice">Revision practice</option><option value="speed_practice">Speed practice</option><option value="mixed_practice">Mixed practice</option></select></label>
         </div>
         <label className="block text-sm font-semibold text-gray-700">Student instructions<textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="mt-1.5 min-h-20 w-full rounded-lg border border-gray-300 px-3 py-2.5" placeholder="What should students focus on?" /></label>
+        <div className="block">
+          <span className="text-sm font-semibold text-gray-700">Cover image (optional)</span>
+          <div className="mt-1.5">
+            {form.coverImage ? (
+              <div className="relative rounded-lg overflow-hidden border border-gray-200">
+                <img src={form.coverImage} alt="Cover preview" className="w-full h-48 object-cover" />
+                <button
+                  type="button"
+                  onClick={() => { setForm(prev => ({ ...prev, coverImage: '' })); setCoverFile(null); }}
+                  className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-brand-primary transition-colors">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setCoverFile(file);
+                      handleCoverUpload(file);
+                    }
+                  }}
+                  disabled={uploadingCover}
+                  className="hidden"
+                  id="cover-upload"
+                />
+                <label
+                  htmlFor="cover-upload"
+                  className="cursor-pointer flex flex-col items-center gap-2"
+                >
+                  {uploadingCover ? (
+                    <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
+                  ) : (
+                    <Upload className="w-8 h-8 text-gray-400" />
+                  )}
+                  <span className="text-sm text-gray-600">
+                    {uploadingCover ? 'Uploading...' : 'Click to upload cover image'}
+                  </span>
+                  <span className="text-xs text-gray-400">JPEG, PNG, WebP, GIF (max 5MB)</span>
+                </label>
+              </div>
+            )}
+          </div>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <label className="text-sm font-semibold text-gray-700">Difficulty<select value={form.difficulty} onChange={e => setForm({ ...form, difficulty: e.target.value })} className="mt-1.5 w-full rounded-lg border border-gray-300 px-3 py-2.5"><option value="mixed">🔀 Mixed / All</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label>
           <label className="text-sm font-semibold text-gray-700">Time (minutes)<input type="number" min="1" value={form.timeLimit / 60} onChange={e => setForm({ ...form, timeLimit: Number(e.target.value) * 60 })} className="mt-1.5 w-full rounded-lg border border-gray-300 px-3 py-2.5" /></label>

@@ -25,6 +25,7 @@ type PracticeSetItem = {
   grade?: { name?: string };
   questions?: unknown[];
   timeLimit?: number;
+  coverImage?: string;
 };
 
 export default async function PracticePage({
@@ -50,15 +51,8 @@ export default async function PracticePage({
   }
 
   const queryOr: any[] = [];
-  if (school && school.assignedPracticeSets) {
-    queryOr.push({ _id: { $in: school.assignedPracticeSets } });
-  } else {
-    // Note: If no school, we fallback to showing all published practice sets
-    // Since PracticeSets don't have a status, we assume isPublished: true is enough.
-    // The query object structure dictates we don't necessarily need a fallback OR here, 
-    // but we can add an empty object to represent "match all" for the $or.
-    queryOr.push({});
-  }
+  // Show all published practice books for now (for testing)
+  queryOr.push({});
 
   const [practiceSets, subjects] = await Promise.all([
     PracticeSetModel.find({
@@ -85,7 +79,7 @@ export default async function PracticePage({
     })
       .populate('subject', 'name')
       .populate('grade', 'name')
-      .select('name description difficulty type subject grade questions timeLimit')
+      .select('name description difficulty type subject grade questions timeLimit coverImage')
       .sort({ createdAt: -1 })
       .limit(50)
       .lean(),
@@ -127,60 +121,66 @@ export default async function PracticePage({
         </div>
 
         {practiceSets.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {(practiceSets as PracticeSetItem[]).map((set) => (
-              <GlassCard key={set._id.toString()} className="p-5 bg-white border border-gray-200/80 hover:border-brand-primary/40 transition-all flex flex-col h-full shadow-xs hover:shadow-card group">
-                <div className="flex justify-between items-start mb-3 gap-2">
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-sm group-hover:text-brand-primary transition-colors">{set.name}</h3>
-                    <p className="text-xs text-gray-500 line-clamp-2 mt-0.5">{set.description || 'No description provided.'}</p>
+              <div key={set._id.toString()} className="group relative">
+                <Link href={`/student/practice/${set._id}`} className="block">
+                  <div className="relative aspect-[2/3] max-h-[250px] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    {set.coverImage ? (
+                      <img
+                        src={set.coverImage}
+                        alt={set.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-brand-primary to-brand-primary/80 flex items-center justify-center">
+                        <BookOpen className="w-16 h-16 text-white/80" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <h3 className="font-bold text-white text-sm line-clamp-2 mb-1">{set.name}</h3>
+                      <div className="flex items-center gap-2 text-xs text-white/80">
+                        <span className="flex items-center gap-1">
+                          <Target className="w-3 h-3" />
+                          {set.questions?.length || 0}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {Math.round((set.timeLimit || 1800) / 60)}m
+                        </span>
+                      </div>
+                    </div>
+                    <div className="absolute top-2 right-2">
+                      <StatusChip
+                        variant={
+                          set.difficulty === 'easy' ? 'success' :
+                          set.difficulty === 'medium' ? 'warning' :
+                          set.difficulty === 'hard' ? 'danger' : 'neutral'
+                        }
+                        className="text-[10px]"
+                      >
+                        {set.difficulty || 'mixed'}
+                      </StatusChip>
+                    </div>
                   </div>
-                  <StatusChip
-                    variant={
-                      set.difficulty === 'easy' ? 'success' :
-                      set.difficulty === 'medium' ? 'warning' :
-                      set.difficulty === 'hard' ? 'danger' : 'neutral'
-                    }
-                  >
-                    {set.difficulty || 'mixed'}
-                  </StatusChip>
-                </div>
-
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {set.subject && (
-                    <span className="text-[11px] bg-brand-lighter/70 text-brand-primary font-semibold px-2.5 py-0.5 rounded-full">
-                      {set.subject.name}
-                    </span>
-                  )}
-                  {set.grade && (
-                    <span className="text-[11px] bg-blue-50 text-blue-600 font-semibold px-2.5 py-0.5 rounded-full">
-                      {set.grade.name}
-                    </span>
-                  )}
-                  {set.type && (
-                    <span className="text-[11px] bg-purple-50 text-purple-600 font-semibold px-2.5 py-0.5 rounded-full capitalize">
-                      {set.type.replace(/_/g, ' ')}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-4 text-xs text-gray-500 mb-5 mt-auto pt-3 border-t border-gray-100">
-                  <div className="flex items-center gap-1.5">
-                    <Target className="w-3.5 h-3.5 text-gray-400" />
-                    <span>{set.questions?.length || 0} Questions</span>
+                  <div className="mt-3 space-y-1">
+                    <div className="flex flex-wrap gap-1">
+                      {set.subject && (
+                        <span className="text-[10px] bg-brand-lighter/70 text-brand-primary font-semibold px-2 py-0.5 rounded-full">
+                          {set.subject.name}
+                        </span>
+                      )}
+                      {set.grade && (
+                        <span className="text-[10px] bg-blue-50 text-blue-600 font-semibold px-2 py-0.5 rounded-full">
+                          {set.grade.name}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 line-clamp-1">{set.description || 'No description'}</p>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-gray-400" />
-                    <span>{Math.round((set.timeLimit || 1800) / 60)} min</span>
-                  </div>
-                </div>
-
-                <Link href={`/student/practice/${set._id}`}>
-                  <PrimaryButton size="sm" className="w-full justify-center gap-1.5">
-                    Start Practice <ArrowRight className="w-3.5 h-3.5" />
-                  </PrimaryButton>
                 </Link>
-              </GlassCard>
+              </div>
             ))}
           </div>
         ) : (
