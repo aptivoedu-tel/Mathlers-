@@ -199,7 +199,7 @@ export default function AdminPracticePage() {
       {books.map(book => <GlassCard key={book._id} className="flex min-h-64 flex-col p-5 bg-white border border-gray-200/90 shadow-card">
         {book.coverImage && (
           <div className="mb-4 -mx-5 -mt-5">
-            <img src={book.coverImage} alt={book.name} className="w-full aspect-[2/3] object-cover" />
+            <img src={book.coverImage} alt={book.name} className="w-full aspect-[2/3] object-cover max-h-[250px]" />
           </div>
         )}
         <div className="flex items-start justify-between gap-3">
